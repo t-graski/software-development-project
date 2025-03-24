@@ -1,0 +1,16 @@
+{% if employees %}
+    <ul>
+        {% for employee in employees %}
+            {#            information containng firstanme, lastname, employeeId, email, roleId using p tags#}
+            <li>
+                <p>Firstname: {{ employee.firstname }}</p>
+                <p>Lastname: {{ employee.lastname }}</p>
+                <p>Id: {{ employee.employeeId }}</p>
+                <p>Email: {{ employee.email }}</p>
+                <p>Role: {{ employee.roleId }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No employees found</p>
+{% endif %}
