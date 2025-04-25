@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Progress</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background-color: #f8f9fa;
+        }
+        label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        select, button {
+            padding: 5px 10px;
+            margin-right: 15px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        h2, h3 {
+            color: #343a40;
+        }
+        ul {
+            list-style: disc;
+            margin-left: 30px;
+        }
+        .legend {
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Squad Health Check – User Progress</h2>
+
+    <form method="get">
+        <label>Select Session:</label>
+        <select name="session">
+            {% for session in sessions %}
+                <option value="{{ session.id }}" {% if session.id|stringformat:"s" == request.GET.session %}selected{% endif %}>
+                    {{ session.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label>Select Health Card:</label>
+        <select name="card">
+            {% for card in health_cards %}
+                <option value="{{ card.id }}" {% if card.id|stringformat:"s" == request.GET.card %}selected{% endif %}>
+                    {{ card.title }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">View</button>
+    </form>
+
+    <p><strong>Progress:</strong> “Better” means the squad feels this area is improving. “Worse” means concerns still exist or are growing.</p>
+
+    {% if votes %}
+        <h3>Votes in Selected Session</h3>
+        <ul>
+            {% for vote in votes %}
+                <li>
+                    "{{ vote.health_card.title }}":
+                    <strong style="
+                        {% if vote.vote|lower == 'green' %}color:#28a745;
+                        {% elif vote.vote|lower == 'amber' %}color:#ffc107;
+                        {% else %}color:#dc3545;
+                        {% endif %}
+                    ">
+                        {{ vote.vote|capfirst }}
+                    </strong>
+                    – Progress: <strong>{{ vote.progress|yesno:"Better,Worse" }}</strong>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        {% if request.GET.session %}
+            <p><em>No votes recorded for this session.</em></p>
+        {% endif %}
+    {% endif %}
+
+    {% if chart_data %}
+        <h3>Progress Over Time for Selected Card</h3>
+        <canvas id="progressChart" width="600" height="300"></canvas>
+        <script>
+            const chartData = {{ chart_data|safe }};
+            const ctx = document.getElementById('progressChart').getContext('2d');
+
+            const voteColors = {
+                green: '#28a745',
+                amber: '#ffc107',
+                red: '#dc3545'
+            };
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.map(item => item.session),
+                    datasets: [{
+                        label: 'Vote Level',
+                        data: chartData.map(item =>
+                            item.vote === 'green' ? 3 :
+                            item.vote === 'amber' ? 2 : 1
+                        ),
+                        backgroundColor: chartData.map(item => {
+                            const vote = (item.vote || "").toLowerCase();
+                            return voteColors[vote] || '#ccc';
+                        }),
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: 3,
+                            ticks: {
+                                stepSize: 1,
+                                callback: function(value) {
+                                    return value === 3 ? 'Green' :
+                                           value === 2 ? 'Amber' :
+                                           value === 1 ? 'Red' : '';
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Vote Level'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Session'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Voting Progress Over Sessions'
+                        },
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        </script>
+
+        <div class="legend">
+            <strong>Legend (Squad Health Model):</strong><br>
+            <span style="color:#28a745;"><strong>Green</strong></span>: Squad is happy – no major issues<br>
+            <span style="color:#ffc107;"><strong>Amber</strong></span>: Some problems – needs improvement<br>
+            <span style="color:#dc3545;"><strong>Red</strong></span>: Serious concerns – needs urgent attention
+        </div>
+    {% endif %}
+</body>
+</html>
