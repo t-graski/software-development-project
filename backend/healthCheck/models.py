@@ -1,18 +1,13 @@
+from django.contrib.auth.models import User
+from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 
 
 class Employee(models.Model):
     employeeId = models.AutoField(primary_key=True)
-    firstname = models.CharField(max_length=50)
-    lastname = models.CharField(max_length=50)
-    email = models.EmailField(max_length=100)
-    password = models.CharField(max_length=50)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     roleType = models.CharField(max_length=50)
-    teamId = models.ForeignKey("Team", on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.firstname + " " + self.lastname
-
+    teamId = models.ForeignKey("Team", on_delete=models.CASCADE, null=True, blank=True)
 
 class Team(models.Model):
     teamId = models.AutoField(primary_key=True)

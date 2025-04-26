@@ -68,6 +68,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mainSite.wsgi.application'
 
+LOGIN_URL = '/health/login'
+
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
