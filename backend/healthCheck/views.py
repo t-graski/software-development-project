@@ -6,6 +6,7 @@ from django.shortcuts import redirect, render
 from django.template import loader
 from django.contrib.auth.models import User
 
+from healthCheck.decorators import role_required
 from healthCheck.forms import RegisterForm, LoginForm
 from healthCheck.models import Employee
 
@@ -65,6 +66,7 @@ def login_view(request):
 
 
 @login_required
+@role_required(allowed_roles=['admin'])
 def profile(request):
     if request.method == 'POST':
         first_name = request.POST['first_name']

@@ -5,9 +5,10 @@ from django.db import models
 
 class Employee(models.Model):
     employeeId = models.AutoField(primary_key=True)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='employee')
     roleType = models.CharField(max_length=50)
     teamId = models.ForeignKey("Team", on_delete=models.CASCADE, null=True, blank=True)
+
 
 class Team(models.Model):
     teamId = models.AutoField(primary_key=True)
