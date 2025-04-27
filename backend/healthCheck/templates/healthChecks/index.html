@@ -1,3 +1,6 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'healthChecks/css/style.css' %}">
+
 {% if employees %}
     <ul>
         {% for employee in employees %}

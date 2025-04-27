@@ -1,5 +1,14 @@
-﻿<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Register</button>
-</form>
+﻿{% extends 'healthChecks/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="login-container">
+        <h2>Login</h2>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <a href="{% url 'register' %}">Don't have an account? Register here</a>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+{% endblock %}

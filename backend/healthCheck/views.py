@@ -1,5 +1,6 @@
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
+from django.core.checks import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template import loader
@@ -61,3 +62,26 @@ def login_view(request):
     else:
         form = LoginForm()
     return render(request, 'healthChecks/login.html', {'form': form})
+
+
+@login_required
+def profile(request):
+    if request.method == 'POST':
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        email = request.POST['email']
+        username = request.POST['username']
+
+        user = request.user
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.username = username
+        user.save()
+
+        return redirect('profile')
+    return render(request, 'healthChecks/profile.html')
+
+def user_logout(request):
+    logout(request)
+    return redirect('login')
