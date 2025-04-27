@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Check Vote</title>
+</head>
+<body>
+
+    <h1>Vote on Health Check Cards</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        {% for card in cards %}
+            <div>
+                <label for="vote_{{ card.id }}">{{ card.displayName }}</label><br>
+                
+                <!-- Vote selection -->
+                <label>
+                    <input type="radio" name="vote_{{ card.id }}" value="Red"> Red
+                </label>
+                <label>
+                    <input type="radio" name="vote_{{ card.id }}" value="Amber"> Amber
+                </label>
+                <label>
+                    <input type="radio" name="vote_{{ card.id }}" value="Green"> Green
+                </label>
+                <br>
+                
+                <!-- Progress check -->
+                <label for="progress_{{ card.id }}">Progress</label>
+                <input type="checkbox" name="progress_{{ card.id }}" id="progress_{{ card.id }}">
+            </div>
+            <hr>
+        {% endfor %}
+        
+        <button type="submit">Submit Votes</button>
+    </form>
+
+</body>
+</html>
