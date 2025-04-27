@@ -89,6 +89,7 @@ def profile(request):
 def user_logout(request):
     logout(request)
     return redirect('login')
+
 # @login_required
 def voteView(request):
     employee = Employee.objects.first()
