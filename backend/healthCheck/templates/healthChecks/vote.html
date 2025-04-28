@@ -1,0 +1,74 @@
+{% extends 'healthChecks/base.html' %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/voteStyle.css' %}">
+
+    
+{% endblock %}
+
+{% block content %}
+
+<h1>Let's complete the health check</h1>
+
+<br>
+<div class="cards">
+    <form method="post">
+        {% csrf_token %}
+    
+        {% for card in cards %}
+        <div class="voteCard">
+            <h2>{{card.displayName}}</h2>
+    
+            <label>How well does your team achieve this?: </label>
+            <br><br>
+
+            <input type="radio" id="vote_{{ card.typeId }}_good" name="vote_{{ card.typeId }}" value="Good"> Good
+            <input type="radio" id="vote_{{ card.typeId }}_neutral" name="vote_{{ card.typeId }}"  value="Neutral"> Neutral
+            <input type="radio" id="vote_{{ card.typeId }}_bad" name="vote_{{ card.typeId }}"  value="Bad"> Bad
+            <br><br>
+
+            <label>How well is your team progressing to achieve this?: </label>
+            <br><br>
+            <input type="radio" id="progress_{{ card.typeId }}_good" name="progress_{{ card.typeId }}" value="Good"> Good
+            <input type="radio" id="progress_{{ card.typeId }}_neutral" name="progress_{{ card.typeId }}"  value="Neutral"> Neutral
+            <input type="radio" id="progress_{{ card.typeId }}_bad" name="progress_{{ card.typeId }}"  value="Bad"> Bad
+        </div>
+    
+        <br>
+        {% endfor %}
+
+        <button type="submit" name="save" value="save">Save and Come Back Later</button>
+        <button type="submit" name="submit">Submit and Send</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        document.querySelectorAll('input[type="radio"]').forEach(function(input){
+            const key = input.name;
+            const savedValue = localStorage.getItem(key);
+
+            if(savedValue && input.value === savedValue){
+                input.checked = true;
+            }
+
+            input.addEventListener('change', function(){
+                localStorage.setItem(key, input.value);
+            });
+        });
+
+        const form = document.querySelector('form');
+
+        form.addEventListener('submit', function(event){
+            const clickedButton = document.activeElement;
+            if(clickedButton.name === 'submit'){
+                localStorage.clear();
+            }
+        });
+    });
+
+    
+</script>
+
+{% endblock %}

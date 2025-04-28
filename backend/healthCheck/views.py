@@ -90,30 +90,46 @@ def user_logout(request):
     logout(request)
     return redirect('login')
 
-# @login_required
+@login_required
 def voteView(request):
-    employee = Employee.objects.first()
-    team = Team.objects.first()
-
-    healthCheck = HealthCheck.objects.create(
-        employeeId = employee,
-        teamId = team
-    )
+    try:
+        employee = request.user.employee
+    except Employee.DoesNotExist:
+        return HttpResponse("You don't have an Employee profile yet. Please contact an administrator")
+    
+    team = employee.teamId    
 
     cards = HealthCheckType.objects.all()
     print(f"Cards: {cards}")
 
     if request.method == 'POST':
+        print(request.POST)
+
+        if 'save' in request.POST:           
+            return redirect('vote')
+
+        else:
+            healthCheck = HealthCheck.objects.create(
+            employeeId = employee,
+            teamId = team
+        )   
+
         for card in cards:
             voteValue = request.POST.get(f'vote_{card.typeId}')
-            direction = request.POST.get(f'progress_{card.typeId}')
-            directionValue = "Positive" if direction == 'on' else "Negative"
+            progressValue = request.POST.get(f'progress_{card.typeId}')
 
-            HealthCheckVotes.objects.update_or_create(
-                checkId = healthCheck,
-                typeId = card,
-                defaults = {'vote': voteValue, 'direction': directionValue}
-            )
+            print(f"Vote value for {card.typeId}: {voteValue}")
+            print(f"Direction value for {card.typeId}: {progressValue}")
+
+            if voteValue and progressValue:
+                HealthCheckVotes.objects.update_or_create(
+                    checkId = healthCheck,
+                    typeId = card,
+                    defaults = {'vote': voteValue, 'direction': progressValue}
+                )
+            else:
+                print(f"No vote selected for card {card.typeId}")
         
         return redirect('vote')
+
     return render(request, 'healthChecks/vote.html', {'cards': cards})
