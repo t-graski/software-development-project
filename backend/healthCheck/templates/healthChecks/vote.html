@@ -20,38 +20,59 @@
 <div class="cards">
     <form method="post">
         {% csrf_token %}
+        <input type="hidden" name="check_id" value="{{ healthCheck.checkId}}">
     
         {% for card in cards %}
         <div class="voteCard">
             <h2>{{card.displayName}}</h2>
+
+            <p>Description</p>
     
             <p>How well does your team achieve this?:</p>
             
             <label for="vote_{{ card.typeId }}_good" class="good">
-                <input type="radio" class="question good" id="vote_{{ card.typeId }}_good" name="vote_{{ card.typeId }}" value="Good">
+                <input type="radio" class="question good" id="vote_{{ card.typeId }}_good" name="vote_{{ card.typeId }}" value="Good"
+                {% if card.vote == "Good" %}
+                    checked
+                {% endif %}>
                 Good
             </label>            
             <label for="vote_{{ card.typeId }}_neutral" class="neutral">
-                <input type="radio" class="question neutral" id="vote_{{ card.typeId }}_neutral" name="vote_{{ card.typeId }}" value="Neutral">
+                <input type="radio" class="question neutral" id="vote_{{ card.typeId }}_neutral" name="vote_{{ card.typeId }}" value="Neutral"
+                {% if card.vote == "Neutral" %}
+                    checked
+                {% endif %}>
                 Neutral
             </label>
             <label for="vote_{{ card.typeId }}_bad" class="bad">
-                <input type="radio" class="question bad" id="vote_{{ card.typeId }}_bad" name="vote_{{ card.typeId }}" value="Bad">
+                <input type="radio" class="question bad" id="vote_{{ card.typeId }}_bad" name="vote_{{ card.typeId }}" value="Bad"
+                {% if card.vote == "Bad" %}
+                    checked
+                {% endif %}>
                 Bad
             </label>
             <br><br>
 
             <p>How well is your team progressing to achieve this?: </p>
             <label for="progress_{{ card.typeId }}_good" class="good">
-                <input type="radio" class="question good" id="progress_{{ card.typeId }}_good" name="progress_{{ card.typeId }}" value="Good">
+                <input type="radio" class="question good" id="progress_{{ card.typeId }}_good" name="progress_{{ card.typeId }}" value="Good"
+                {% if card.direction == "Good" %}
+                    checked
+                {% endif %}>
                 Good
             </label>            
             <label for="progress_{{ card.typeId }}_neutral" class="neutral">
-                <input type="radio" class="question neutral" id="progress_{{ card.typeId }}_neutral" name="progress_{{ card.typeId }}" value="Neutral">
+                <input type="radio" class="question neutral" id="progress_{{ card.typeId }}_neutral" name="progress_{{ card.typeId }}" value="Neutral"
+                {% if card.direction == "Neutral" %}
+                    checked
+                {% endif %}>
                 Neutral
             </label>
             <label for="progress_{{ card.typeId }}_bad" class="bad">
-                <input type="radio" class="question bad" id="progress_{{ card.typeId }}_bad" name="progress_{{ card.typeId }}" value="Bad">
+                <input type="radio" class="question bad" id="progress_{{ card.typeId }}_bad" name="progress_{{ card.typeId }}" value="Bad"
+                {% if card.direction == "Bad" %}
+                    checked
+                {% endif %}>
                 Bad
             </label>
         </div>
@@ -84,16 +105,13 @@
         
     document.querySelectorAll('input[type="radio"]').forEach(function(input){
         const key = input.name;
-        const savedValue = localStorage.getItem(key);
 
-        if(savedValue && input.value === savedValue){
-            input.checked = true;
+        if(input.checked){
             answeredQuestions.add(key);
         }
 
         input.addEventListener('change', function(){
             const alreadyAnswered = answeredQuestions.has(key);
-            localStorage.setItem(key, input.value);
              
             if(!alreadyAnswered){
                 answeredQuestions.add(key);
@@ -103,15 +121,6 @@
     });
 
     updateProgressBar();
-
-    const form = document.querySelector('form');
-
-    form.addEventListener('submit', function(event){
-        const clickedButton = document.activeElement;
-        if(clickedButton.name === 'submit'){
-            localStorage.clear();
-        }
-    });      
 </script>
 
 {% endblock %}
