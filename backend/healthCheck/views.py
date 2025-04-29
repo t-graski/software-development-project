@@ -192,7 +192,7 @@ def voteView(request):
         print(request.POST)
 
         if 'save' in request.POST:
-            return redirect('vote')
+            return redirect('dashboard')
 
         else:
             healthCheck = HealthCheck.objects.create(
@@ -216,7 +216,7 @@ def voteView(request):
             else:
                 print(f"No vote selected for card {card.typeId}")
 
-        return redirect('vote')
+        return redirect('dashboard')
 
     return render(request, 'healthChecks/vote.html', {'cards': cards})
 

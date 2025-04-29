@@ -43,9 +43,9 @@
                         {% if not session.hasStarted and not session.hasCompleted %}
                             <a href="/vote/" class="button">Start</a>
                         {% elif session.hasStarted and not session.hasCompleted %}
-                            <a href="#" class="button">Continue</a>
+                            <a href="http://127.0.0.1:8000/vote/" class="button">Continue</a>
                         {% else %}
-                            <a href="#" class="button">View</a>
+                            <a href="http://127.0.0.1:8000/vote/" class="button">View</a>
                         {% endif %}
                     </td>
                 </tr>
