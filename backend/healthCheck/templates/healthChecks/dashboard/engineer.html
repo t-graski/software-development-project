@@ -1,0 +1,60 @@
+﻿{% extends 'healthChecks/base.html' %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'healthChecks/css/style.css' %}">
+{% block content %}
+    <div class="dashboard">
+        <div class="greeting">Good morning, {{ request.user.first_name }}!</div>
+
+        <form method="GET" class="team-select-form">
+            <label for="team-select">Select Team:</label>
+            <select id="team-select" name="selected_team_id" onchange="this.form.submit()">
+                <option value="">All Teams</option>
+                {% for team in teams %}
+                    <option value="{{ team.teamId }}"
+                            {% if selected_team_id == team.teamId|stringformat:"s" %}selected{% endif %}>{{ team.teamName }}</option>
+                {% endfor %}
+            </select>
+        </form>
+
+        <h2>Available Health Check Sessions</h2>
+
+        <table class="session-table">
+            <thead>
+            <tr>
+                <th>Session</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for session in sessions %}
+                <tr>
+                    <td>{{ session.timestamp }}</td>
+                    <td>
+                        {% if not session.hasStarted and not session.hasCompleted %}
+                            Not started
+                        {% elif session.hasStarted and not session.hasCompleted %}
+                            In progress
+                        {% else %}
+                            Completed
+                        {% endif %}
+                    </td>
+                    <td class="session-action">
+                        {% if not session.hasStarted and not session.hasCompleted %}
+                            <a href="#" class="button">Start</a>
+                        {% elif session.hasStarted and not session.hasCompleted %}
+                            <a href="#" class="button">Continue</a>
+                        {% else %}
+                            <a href="#" class="button">View</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">No sessions available.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

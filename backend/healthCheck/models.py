@@ -4,9 +4,16 @@ from django.db import models
 
 
 class Employee(models.Model):
+    ROLE_CHOICES = [
+        ('engineer', 'Engineer'),
+        ('teamlead', 'Team Leader'),
+        ('deptlead', 'Department Leader'),
+        ('senior', 'Senior Manager'),
+    ]
+
     employeeId = models.AutoField(primary_key=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='employee')
-    roleType = models.CharField(max_length=50)
+    roleType = models.CharField(max_length=50, choices=ROLE_CHOICES)
     teamId = models.ForeignKey("Team", on_delete=models.CASCADE, null=True, blank=True)
 
 
@@ -42,6 +49,9 @@ class HealthCheck(models.Model):
     teamId = models.ForeignKey(Team, on_delete=models.CASCADE)
     employeeId = models.ForeignKey(Employee, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(default='')
+    hasStarted = models.BooleanField(default=False)
+    hasCompleted = models.BooleanField(default=False)
 
 
 class HealthCheckVotes(models.Model):

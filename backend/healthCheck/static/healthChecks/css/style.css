@@ -208,3 +208,97 @@ p {
 .profile-form button:hover {
     background-color: #0277bd;
 }
+
+.dashboard {
+    padding: 2rem;
+    max-width: 1200px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.session-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.session-table th, .session-table td {
+    padding: 1rem;
+    text-align: center;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+    color: #333;
+}
+
+.session-table th {
+    background-color: #0288d1;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.session-table td {
+    background-color: #f9f9f9;
+    transition: background-color 0.3s ease;
+}
+
+.session-table tr:hover td {
+    background-color: #f1f9ff;
+}
+
+.session-table td a.button {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    background-color: #0288d1;
+    color: white;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.session-table td a.button:hover {
+    background-color: #0277bd;
+}
+
+.session-action {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.greeting {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.team-select-form {
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.team-select-form label {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.team-select-form select {
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+}
+
+.team-select-form select:focus {
+    border-color: #0288d1;
+}

@@ -1,19 +1,23 @@
+from datetime import datetime
+
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.core.checks import messages
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.shortcuts import redirect, render
+from django.http import HttpResponse, HttpResponseForbidden
 from django.template import loader
-from django.contrib.auth.models import User
 
-from healthCheck.decorators import role_required
 from healthCheck.forms import RegisterForm, LoginForm
-from healthCheck.models import Employee
 from healthCheck.models import *
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.views import View
+
+from .decorators import role_required
+from .models import Employee, HealthCheck, HealthCheckVotes, HealthCheckType
+from django.contrib import messages
 
 
-# Create your views here.
 @login_required
 def index(request):
     employees = Employee.objects.all()
@@ -68,7 +72,6 @@ def login_view(request):
 
 
 @login_required
-@role_required(allowed_roles=['admin'])
 def profile(request):
     if request.method == 'POST':
         first_name = request.POST['first_name']
@@ -86,17 +89,11 @@ def profile(request):
         return redirect('profile')
     return render(request, 'healthChecks/profile.html')
 
+
 def user_logout(request):
     logout(request)
     return redirect('login')
 
-#SC edit
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
-from django.views import View
-from .models import Employee, HealthCheck, HealthCheckVotes, HealthCheckType
-from django.contrib import messages
 
 @method_decorator(login_required, name='dispatch')
 class UserProgressView(View):
@@ -129,6 +126,7 @@ class UserProgressView(View):
             'vote_data': vote_data,
         }
         return render(request, 'healthChecks/user_progress.html', context)
+
 
 @method_decorator(login_required, name='dispatch')
 class SubmitVoteView(View):
@@ -167,14 +165,15 @@ class SubmitVoteView(View):
 
         return redirect('user_progress')
 
+
 @login_required
 def voteView(request):
     try:
         employee = request.user.employee
     except Employee.DoesNotExist:
         return HttpResponse("You don't have an Employee profile yet. Please contact an administrator")
-    
-    team = employee.teamId    
+
+    team = employee.teamId
 
     cards = HealthCheckType.objects.all()
     print(f"Cards: {cards}")
@@ -182,14 +181,14 @@ def voteView(request):
     if request.method == 'POST':
         print(request.POST)
 
-        if 'save' in request.POST:           
+        if 'save' in request.POST:
             return redirect('vote')
 
         else:
             healthCheck = HealthCheck.objects.create(
-            employeeId = employee,
-            teamId = team
-        )   
+                employeeId=employee,
+                teamId=team
+            )
 
         for card in cards:
             voteValue = request.POST.get(f'vote_{card.typeId}')
@@ -200,13 +199,59 @@ def voteView(request):
 
             if voteValue and progressValue:
                 HealthCheckVotes.objects.update_or_create(
-                    checkId = healthCheck,
-                    typeId = card,
-                    defaults = {'vote': voteValue, 'direction': progressValue}
+                    checkId=healthCheck,
+                    typeId=card,
+                    defaults={'vote': voteValue, 'direction': progressValue}
                 )
             else:
                 print(f"No vote selected for card {card.typeId}")
-        
+
         return redirect('vote')
 
     return render(request, 'healthChecks/vote.html', {'cards': cards})
+
+
+@login_required
+def dashboard(request):
+    role = request.user.employee.roleType
+    if role == 'engineer':
+        return redirect('engineer_dashboard')
+    elif role == 'teamlead':
+        return redirect('team_leader_dashboard')
+    elif role == 'deptlead':
+        return redirect('department_leader_dashboard')
+    elif role == 'senior':
+        return redirect('senior_manager_dashboard')
+    return HttpResponseForbidden("Invalid role")
+
+
+@login_required
+@role_required(allowed_roles=['engineer'])
+def engineer_dashboard(request):
+    employee = request.user.employee
+    team_links = EmployeeTeams.objects.filter(employeeId=employee).select_related('teamId')
+    teams = [link.teamId for link in team_links]
+    selected_team_id = request.GET.get('selected_team_id')
+
+    if selected_team_id:
+        sessions = HealthCheck.objects.filter(teamId__teamId=selected_team_id, employeeId=employee)
+    else:
+        sessions = HealthCheck.objects.filter(employeeId=employee)
+
+    hour = datetime.now().hour
+    if hour < 12:
+        greeting = "Good Morning"
+    elif 12 <= hour < 18:
+        greeting = "Good Afternoon"
+    else:
+        greeting = "Good Evening"
+
+    context = {
+        'sessions': sessions,
+        'employee': employee,
+        'teams': teams,
+        'selected_team_id': selected_team_id,
+        'greeting': f"{greeting}, {employee.user.first_name}!"
+    }
+
+    return render(request, 'healthChecks/dashboard/engineer.html', context)
