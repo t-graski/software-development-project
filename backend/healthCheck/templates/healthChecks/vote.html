@@ -21,7 +21,21 @@
     <form method="post">
         {% csrf_token %}
         <input type="hidden" name="check_id" value="{{ healthCheck.checkId}}">
+
+        <div class="voteCard">
+            <h2>How To Vote</h2>
+
+            <p>For each category below, select a rating (e.g., 
+                <span class="good">Good</span>, 
+                <span class="neutral">Neutral</span> or 
+                <span class="bad">Bad</span>) 
+                to reflect the current status.
+                You must select two options in each card, one for the current rating of the category and another for how well is the team progressing to achieve the category
+            </p>
+        </div>
     
+        <br>
+
         {% for card in cards %}
         <div class="voteCard">
             <h2>{{card.displayName}}</h2>

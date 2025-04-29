@@ -56,15 +56,15 @@ input[type="radio"].bad:checked{
     display: none;
 }
 
-label.good{
+.good{
     color: green
 }
 
-label.neutral{
+.neutral{
     color: orangered;
 }
 
-label.bad{
+.bad{
     color: red;
 }
 
@@ -72,7 +72,7 @@ label.bad{
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
+    padding: 10px;
     position: fixed;
     top: 0;
     width: calc(100% - 220px);
