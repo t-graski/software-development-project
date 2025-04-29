@@ -76,6 +76,11 @@ p {
     background-color: #0277bd;
 }
 
+.role-label {
+    margin-top: auto;
+    font-weight: bold;
+}
+
 .footer {
     background-color: #0d1b2a;
     color: #ccd6f6;

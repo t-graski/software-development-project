@@ -18,16 +18,6 @@ from .models import Employee, HealthCheck, HealthCheckVotes, HealthCheckType
 from django.contrib import messages
 
 
-@login_required
-def index(request):
-    employees = Employee.objects.all()
-    template = loader.get_template("healthChecks/vote.html")
-    context = {
-        "employees": employees
-    }
-    return HttpResponse(template.render(context, request))
-
-
 def register_view(request):
     if request.method == "POST":
         form = RegisterForm(request.POST)
@@ -177,21 +167,21 @@ class SubmitVoteView(View):
 
 
 @login_required
-def voteView(request, check_id = None):
+def voteView(request, check_id=None):
     try:
         employee = request.user.employee
     except Employee.DoesNotExist:
         return HttpResponse("You don't have an Employee profile yet. Please contact an administrator")
-    
+
     existingVotes = {}
     healthCheck = None
 
     if check_id:
-        healthCheck = get_object_or_404(HealthCheck, checkId = check_id)
+        healthCheck = get_object_or_404(HealthCheck, checkId=check_id)
 
-        for vote in HealthCheckVotes.objects.filter(checkId = healthCheck):
+        for vote in HealthCheckVotes.objects.filter(checkId=healthCheck):
             existingVotes[vote.typeId.typeId] = {'vote': vote.vote, 'direction': vote.direction}
-        
+
         print(f"Exisitng votes: {existingVotes}")
 
     team = employee.teamId
@@ -214,10 +204,10 @@ def voteView(request, check_id = None):
 
         if not healthCheck:
             healthCheck = HealthCheck.objects.create(
-                employeeId = employee,
-                teamId = team,
-                hasCompleted = isSubmit,
-                hasStarted = True
+                employeeId=employee,
+                teamId=team,
+                hasCompleted=isSubmit,
+                hasStarted=True
             )
 
         if isSubmit:
@@ -227,7 +217,7 @@ def voteView(request, check_id = None):
         if isSave:
             healthCheck.hasStarted = True
             healthCheck.save()
-        
+
         for card in cards:
             voteValue = request.POST.get(f'vote_{card.typeId}')
             progressValue = request.POST.get(f'progress_{card.typeId}')
@@ -237,16 +227,17 @@ def voteView(request, check_id = None):
 
             if voteValue and progressValue:
                 HealthCheckVotes.objects.update_or_create(
-                    checkId = healthCheck,
-                    typeId = card,
-                    defaults = {'vote': voteValue, 'direction': progressValue}
+                    checkId=healthCheck,
+                    typeId=card,
+                    defaults={'vote': voteValue, 'direction': progressValue}
                 )
             else:
                 print(f"No vote or progress selected for card {card.typeId}")
 
-        return redirect('dashboard')  
+        return redirect('dashboard')
 
     return render(request, 'healthChecks/vote.html', {'cards': cards, 'healthCheck': healthCheck})
+
 
 @login_required
 def dashboard(request):
@@ -326,3 +317,57 @@ def team_leader_dashboard(request):
     }
 
     return render(request, 'healthChecks/dashboard/team_leader.html', context)
+
+
+@login_required
+@role_required(allowed_roles=['deptlead'])
+def department_leader_dashboard(request):
+    employee = request.user.employee
+
+    lead_teams = Team.objects.filter(
+        departmentId__in=Team.objects.filter(
+            employeeteams__employeeId=employee
+        ).values_list('departmentId', flat=True)
+    ).distinct()
+
+    all_cards = HealthCheckType.objects.all()
+
+    selected_team_id = request.GET.get('selected_team_id')
+    selected_card_id = request.GET.get('selected_card_id')
+
+    sessions = HealthCheck.objects.filter(teamId__in=lead_teams)
+
+    if selected_team_id:
+        sessions = sessions.filter(teamId__teamId=selected_team_id)
+    if selected_card_id:
+        sessions = sessions.filter(healthcheckvotes__typeId__typeId=selected_card_id)
+
+    context = {
+        'teams': lead_teams,
+        'cards': all_cards,
+        'sessions': sessions,
+        'selected_team_id': selected_team_id,
+        'selected_card_id': selected_card_id,
+    }
+
+    return render(request, 'healthChecks/dashboard/department_leader.html', context)
+
+
+@login_required
+@role_required(allowed_roles=['senior'])
+def senior_manager_dashboard(request):
+    selected_team_id = request.GET.get('selected_team_id')
+    teams = Team.objects.all()
+
+    if selected_team_id:
+        health_checks = HealthCheck.objects.filter(teamId=selected_team_id)
+    else:
+        health_checks = HealthCheck.objects.all()
+
+    context = {
+        "sessions": health_checks,
+        "teams": teams,
+        "selected_team_id": selected_team_id,
+    }
+
+    return render(request, "healthChecks/dashboard/senior_manager.html", context)
