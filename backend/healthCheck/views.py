@@ -87,3 +87,40 @@ def profile(request):
 def user_logout(request):
     logout(request)
     return redirect('login')
+
+from django.shortcuts import render
+from django.db.models import Count
+from .models import Team, HealthCheck, HealthCheckVotes
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def team_summary_view(request):
+    teams = Team.objects.all()
+    sessions = []
+    summary = []
+    selected_team_id = request.GET.get('team')
+    selected_date = request.GET.get('session_date')
+
+    if selected_team_id and selected_date:
+        sessions = HealthCheck.objects.filter(
+            teamId=selected_team_id,
+            timestamp__date=selected_date
+        )
+        summary = HealthCheckVotes.objects.filter(
+            checkId__in=sessions
+        ).values(
+            'typeId__displayName', 'vote'
+        ).annotate(
+            vote_count=Count('vote')  # ✅ Fixed here
+        )
+
+    context = {
+        'teams': teams,
+        'sessions': HealthCheck.objects.values_list('timestamp', flat=True).distinct(),
+        'selected_team_id': selected_team_id,
+        'selected_date': selected_date,
+        'summary': summary
+    }
+
+    return render(request, 'healthChecks/team_summary.html', context)
+
