@@ -1,0 +1,36 @@
+{% extends 'healthChecks/base.html' %}  <!-- This extends the base template, meaning it inherits layout and structure from the base. -->
+
+{% block content %}  <!-- Starts the content block where the unique content of this page will go. -->
+
+    <h2>Health Check Voting</h2>  <!-- The page heading for your voting form. -->
+
+    <form method="post">  <!-- The form will send data to the server using the POST method. -->
+        {% csrf_token %}  <!-- Django CSRF token for security to prevent cross-site request forgery attacks. Always include this in POST forms. -->
+
+        <div class="vote-cards">  <!-- This div will contain all the vote cards. Each card represents a health check. -->
+            {% for card in cards %}  <!-- Loop through each card in the 'cards' list passed from the view. -->
+                <div class="vote-card">  <!-- Each card is wrapped in a div with a class 'vote-card'. -->
+                    <h3>{{ card.name }}</h3>  <!-- Displays the name of the card. 'card.name' refers to the attribute 'name' of the card object. -->
+
+                    <!-- Vote options -->
+                    <label for="vote_{{ card.typeId }}_positive">Vote:</label>  <!-- Label for the "Positive" vote radio button. -->
+                    <input type="radio" id="vote_{{ card.typeId }}_positive" name="vote_{{ card.typeId }}" value="Positive"> Positive
+                    <!-- The radio button for "Positive" vote, with a unique ID and the value "Positive". It is tied to the card's typeId. -->
+
+                    <input type="radio" id="vote_{{ card.typeId }}_negative" name="vote_{{ card.typeId }}" value="Negative"> Negative
+                    <!-- The radio button for "Negative" vote, with a unique ID and the value "Negative". It is tied to the card's typeId. -->
+
+                    <!-- Progress checkbox -->
+                    <label for="progress_{{ card.typeId }}">Progress:</label>  <!-- Label for the "Progress" checkbox. -->
+                    <input type="checkbox" name="progress_{{ card.typeId }}" value="on"> Positive Progress
+                    <!-- The checkbox for indicating positive progress, with a unique name based on the card's typeId. -->
+
+                </div>
+            {% endfor %}  <!-- End of loop. This repeats for each card in the 'cards' list. -->
+        </div>
+
+        <button type="submit">Submit</button>  <!-- Submit button for the form to send the POST request. -->
+
+    </form>
+
+{% endblock %}  <!-- Ends the content block, marking the end of the content unique to this page. -->
