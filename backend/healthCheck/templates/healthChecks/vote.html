@@ -2,14 +2,20 @@
 {% load static %}
 
 {% block head %}
-    <link rel="stylesheet" href="{% static 'css/voteStyle.css' %}">
-
-    
+<link rel="stylesheet" href="{% static 'healthChecks/css/style.css' %}">
+<link rel="stylesheet" href="{% static 'healthChecks/css/voteStyle.css' %}">    
 {% endblock %}
 
 {% block content %}
 
-<h1>Let's complete the health check</h1>
+<div id="progressInfo">
+    <h1 id="title">Let's Complete The Health Check</h1>
+    <div id="progressBorder">
+        <div id="progressFill"></div>
+    </div>
+
+    <span id="percentageCompleted"></span>
+</div>
 
 <br>
 <div class="cards">
@@ -23,52 +29,74 @@
             <label>How well does your team achieve this?: </label>
             <br><br>
 
-            <input type="radio" id="vote_{{ card.typeId }}_good" name="vote_{{ card.typeId }}" value="Good"> Good
-            <input type="radio" id="vote_{{ card.typeId }}_neutral" name="vote_{{ card.typeId }}"  value="Neutral"> Neutral
-            <input type="radio" id="vote_{{ card.typeId }}_bad" name="vote_{{ card.typeId }}"  value="Bad"> Bad
+            <input type="radio" class="question" id="vote_{{ card.typeId }}_good" name="vote_{{ card.typeId }}" value="Good"> Good
+            <input type="radio" class="question" id="vote_{{ card.typeId }}_neutral" name="vote_{{ card.typeId }}"  value="Neutral"> Neutral
+            <input type="radio" class="question" id="vote_{{ card.typeId }}_bad" name="vote_{{ card.typeId }}"  value="Bad"> Bad
             <br><br>
 
             <label>How well is your team progressing to achieve this?: </label>
             <br><br>
-            <input type="radio" id="progress_{{ card.typeId }}_good" name="progress_{{ card.typeId }}" value="Good"> Good
-            <input type="radio" id="progress_{{ card.typeId }}_neutral" name="progress_{{ card.typeId }}"  value="Neutral"> Neutral
-            <input type="radio" id="progress_{{ card.typeId }}_bad" name="progress_{{ card.typeId }}"  value="Bad"> Bad
+            <input type="radio" class="question" id="progress_{{ card.typeId }}_good" name="progress_{{ card.typeId }}" value="Good"> Good
+            <input type="radio" class="question" id="progress_{{ card.typeId }}_neutral" name="progress_{{ card.typeId }}"  value="Neutral"> Neutral
+            <input type="radio" class="question" id="progress_{{ card.typeId }}_bad" name="progress_{{ card.typeId }}"  value="Bad"> Bad
         </div>
     
         <br>
         {% endfor %}
-
-        <button type="submit" name="save" value="save">Save and Come Back Later</button>
-        <button type="submit" name="submit">Submit and Send</button>
+        <div class="voteCard" id="buttonsCard">
+            <button type="submit" class="button" name="save" value="save">Save and Come Back Later</button>
+            <button type="submit" class="hidden button" id="submit" name="submit">Submit and Send</button>
+        </div>        
     </form>
 </div>
 
+
 <script>
-    document.addEventListener('DOMContentLoaded', function(){
-        document.querySelectorAll('input[type="radio"]').forEach(function(input){
-            const key = input.name;
-            const savedValue = localStorage.getItem(key);
+    let answerCount = 0;
+    let totalQuestions = document.getElementsByClassName('question').length / 3;
+    let percentage = 0;
 
-            if(savedValue && input.value === savedValue){
-                input.checked = true;
+    function updateProgressBar(){
+        percentage = (answerCount / totalQuestions) * 100
+        document.getElementById('percentageCompleted').textContent = `${Math.round(percentage)}% completed`;
+        document.getElementById('progressFill').style.width = Math.round(percentage) + '%';
+
+        if(percentage === 100){
+            document.getElementById('submit').classList.remove('hidden')
+            document.getElementById('title').textContent = 'Health Check Completed'
+        }
+    }
+        
+    document.querySelectorAll('input[type="radio"]').forEach(function(input){
+        const key = input.name;
+        const savedValue = localStorage.getItem(key);
+
+        if(savedValue && input.value === savedValue){
+            input.checked = true;
+            answerCount++
+        }
+
+        input.addEventListener('change', function(){
+            localStorage.setItem(key, input.value);
+                
+            if(!savedValue){
+                answerCount++
             }
 
-            input.addEventListener('change', function(){
-                localStorage.setItem(key, input.value);
-            });
-        });
-
-        const form = document.querySelector('form');
-
-        form.addEventListener('submit', function(event){
-            const clickedButton = document.activeElement;
-            if(clickedButton.name === 'submit'){
-                localStorage.clear();
-            }
-        });
+            updateProgressBar();            
+        });           
     });
 
-    
+    updateProgressBar();
+
+    const form = document.querySelector('form');
+
+    form.addEventListener('submit', function(event){
+        const clickedButton = document.activeElement;
+        if(clickedButton.name === 'submit'){
+            localStorage.clear();
+        }
+    });      
 </script>
 
 {% endblock %}
