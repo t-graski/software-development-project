@@ -9,13 +9,35 @@ h1, h2 {
     color: #1d88d1;
 }
 
-label {
-    font-size: 17.5px;
+p {
+    font-size: 17px;
 }
 
 input {
     margin-right: 10px;
     margin-left: 10px;
+}
+
+input[type="radio"]{
+    transform: scale(1.25);  
+    margin-right: 1%; 
+    margin-left: 5%;
+}
+
+input[type="radio"].good:checked{
+    accent-color: green;
+}
+
+input[type="radio"].neutral:checked{
+    accent-color: orangered;
+}
+
+input[type="radio"].bad:checked{
+    accent-color: red;
+}
+
+.cards {
+    margin-top: 150px;
 }
 
 .voteCard {
@@ -25,8 +47,7 @@ input {
 
     margin-left: 30%;
     margin-right: 30%;
-    padding-top: 30px;
-    padding-bottom: 30px;
+    padding: 30px;
 
     animation: fadeIn 1s ease;
 }
@@ -35,14 +56,29 @@ input {
     display: none;
 }
 
+.good{
+    color: green
+}
+
+.neutral{
+    color: orangered;
+}
+
+.bad{
+    color: red;
+}
+
 #progressInfo { 
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-
-    margin-left: 30%;
-    margin-right: 30%;
-    padding: 30px;
+    padding: 10px;
+    position: fixed;
+    top: 0;
+    width: calc(100% - 220px);
+    left: 220px;
+    z-index: 1000;
+    justify-content: center;
 }
 
 /*Centers and adds a margin to the text displaying the precentage of completed questions*/

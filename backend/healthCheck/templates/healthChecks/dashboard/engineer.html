@@ -41,11 +41,11 @@
                     </td>
                     <td class="session-action">
                         {% if not session.hasStarted and not session.hasCompleted %}
-                            <a href="/vote/" class="button">Start</a>
+                            <a href="{% url 'vote' check_id=session.checkId %}" class="button">Start</a>
                         {% elif session.hasStarted and not session.hasCompleted %}
-                            <a href="#" class="button">Continue</a>
+                            <a href="{% url 'vote' check_id=session.checkId %}" class="button">Continue</a>
                         {% else %}
-                            <a href="#" class="button">View</a>
+                            <a href="{% url 'vote' check_id=session.checkId %}" class="button">View</a>
                         {% endif %}
                     </td>
                 </tr>
