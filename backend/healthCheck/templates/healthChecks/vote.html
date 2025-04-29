@@ -17,7 +17,6 @@
     <span id="percentageCompleted"></span>
 </div>
 
-<br>
 <div class="cards">
     <form method="post">
         {% csrf_token %}
@@ -26,19 +25,35 @@
         <div class="voteCard">
             <h2>{{card.displayName}}</h2>
     
-            <label>How well does your team achieve this?: </label>
+            <p>How well does your team achieve this?:</p>
+            
+            <label for="vote_{{ card.typeId }}_good" class="good">
+                <input type="radio" class="question good" id="vote_{{ card.typeId }}_good" name="vote_{{ card.typeId }}" value="Good">
+                Good
+            </label>            
+            <label for="vote_{{ card.typeId }}_neutral" class="neutral">
+                <input type="radio" class="question neutral" id="vote_{{ card.typeId }}_neutral" name="vote_{{ card.typeId }}" value="Neutral">
+                Neutral
+            </label>
+            <label for="vote_{{ card.typeId }}_bad" class="bad">
+                <input type="radio" class="question bad" id="vote_{{ card.typeId }}_bad" name="vote_{{ card.typeId }}" value="Bad">
+                Bad
+            </label>
             <br><br>
 
-            <input type="radio" class="question" id="vote_{{ card.typeId }}_good" name="vote_{{ card.typeId }}" value="Good"> Good
-            <input type="radio" class="question" id="vote_{{ card.typeId }}_neutral" name="vote_{{ card.typeId }}"  value="Neutral"> Neutral
-            <input type="radio" class="question" id="vote_{{ card.typeId }}_bad" name="vote_{{ card.typeId }}"  value="Bad"> Bad
-            <br><br>
-
-            <label>How well is your team progressing to achieve this?: </label>
-            <br><br>
-            <input type="radio" class="question" id="progress_{{ card.typeId }}_good" name="progress_{{ card.typeId }}" value="Good"> Good
-            <input type="radio" class="question" id="progress_{{ card.typeId }}_neutral" name="progress_{{ card.typeId }}"  value="Neutral"> Neutral
-            <input type="radio" class="question" id="progress_{{ card.typeId }}_bad" name="progress_{{ card.typeId }}"  value="Bad"> Bad
+            <p>How well is your team progressing to achieve this?: </p>
+            <label for="progress_{{ card.typeId }}_good" class="good">
+                <input type="radio" class="question good" id="progress_{{ card.typeId }}_good" name="progress_{{ card.typeId }}" value="Good">
+                Good
+            </label>            
+            <label for="progress_{{ card.typeId }}_neutral" class="neutral">
+                <input type="radio" class="question neutral" id="progress_{{ card.typeId }}_neutral" name="progress_{{ card.typeId }}" value="Neutral">
+                Neutral
+            </label>
+            <label for="progress_{{ card.typeId }}_bad" class="bad">
+                <input type="radio" class="question bad" id="progress_{{ card.typeId }}_bad" name="progress_{{ card.typeId }}" value="Bad">
+                Bad
+            </label>
         </div>
     
         <br>
@@ -52,18 +67,18 @@
 
 
 <script>
-    let answerCount = 0;
+    let answeredQuestions = new Set();
     let totalQuestions = document.getElementsByClassName('question').length / 3;
     let percentage = 0;
 
     function updateProgressBar(){
-        percentage = (answerCount / totalQuestions) * 100
+        percentage = (answeredQuestions.size / totalQuestions) * 100;
         document.getElementById('percentageCompleted').textContent = `${Math.round(percentage)}% completed`;
         document.getElementById('progressFill').style.width = Math.round(percentage) + '%';
 
         if(percentage === 100){
-            document.getElementById('submit').classList.remove('hidden')
-            document.getElementById('title').textContent = 'Health Check Completed'
+            document.getElementById('submit').classList.remove('hidden');
+            document.getElementById('title').textContent = 'Health Check Completed';
         }
     }
         
@@ -73,17 +88,17 @@
 
         if(savedValue && input.value === savedValue){
             input.checked = true;
-            answerCount++
+            answeredQuestions.add(key);
         }
 
         input.addEventListener('change', function(){
+            const alreadyAnswered = answeredQuestions.has(key);
             localStorage.setItem(key, input.value);
-                
-            if(!savedValue){
-                answerCount++
-            }
-
-            updateProgressBar();            
+             
+            if(!alreadyAnswered){
+                answeredQuestions.add(key);
+                updateProgressBar(); 
+            }             
         });           
     });
 
