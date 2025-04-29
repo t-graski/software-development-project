@@ -268,6 +268,7 @@ def engineer_dashboard(request):
 
 
 @login_required
+@role_required(allowed_roles=['teamlead'])
 def team_leader_dashboard(request):
     employee = request.user.employee
 

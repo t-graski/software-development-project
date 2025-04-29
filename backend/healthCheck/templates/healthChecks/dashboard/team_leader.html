@@ -32,6 +32,7 @@
                 <th>Session ID</th>
                 <th>Status</th>
                 <th>Timestamp</th>
+                <th>Action</th>
             </tr>
             </thead>
             <tbody>
@@ -49,6 +50,16 @@
                         {% endif %}
                     </td>
                     <td>{{ session.timestamp|date:"Y-m-d H:i" }}</td>
+                    <td class="session-action">
+                        <a href="" class="button">View average</a>
+                        {% if not session.hasStarted and not session.hasCompleted %}
+                            <a href="/vote/" class="button">Start</a>
+                        {% elif session.hasStarted and not session.hasCompleted %}
+                            <a href="#" class="button">Continue</a>
+                        {% else %}
+                            <a href="#" class="button">View</a>
+                        {% endif %}
+                    </td>
                 </tr>
             {% empty %}
                 <tr>
