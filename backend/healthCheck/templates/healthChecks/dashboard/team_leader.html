@@ -1,0 +1,61 @@
+﻿{% extends 'healthChecks/base.html' %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'healthChecks/css/style.css' %}">
+
+{% block content %}
+    <div>
+        <div class="greeting">Good morning, {{ request.user.first_name }}!</div>
+        <form method="get" class="team-select-form">
+            <label for="team-id-select">Team:</label>
+            <select id="team-id-select" name="selected_team_id" onchange="this.form.submit()">
+                <option value="">All Teams</option>
+                {% for team in teams %}
+                    <option value="{{ team.teamId }}"
+                            {% if team.teamId|stringformat:"s" == selected_team_id %}selected{% endif %}>{{ team.teamName }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="card-id-select">Card:</label>
+            <select id="card-id-select" name="selected_card_id" onchange="this.form.submit()">
+                <option value="">All Cards</option>
+                {% for card in cards %}
+                    <option value="{{ card.typeId }}"
+                            {% if card.typeId|stringformat:"s" == selected_card_id %}selected{% endif %}>{{ card.displayName }}</option>
+                {% endfor %}
+            </select>
+        </form>
+
+        <table class="session-table">
+            <thead>
+            <tr>
+                <th>Team</th>
+                <th>Session ID</th>
+                <th>Status</th>
+                <th>Timestamp</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for session in sessions %}
+                <tr>
+                    <td>{{ session.teamId.teamName }}</td>
+                    <td>{{ session.checkId }}</td>
+                    <td>
+                        {% if session.hasCompleted %}
+                            Completed
+                        {% elif session.hasStarted %}
+                            In Progress
+                        {% else %}
+                            Not Started
+                        {% endif %}
+                    </td>
+                    <td>{{ session.timestamp|date:"Y-m-d H:i" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">No sessions found for selected filters.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -41,6 +41,7 @@ class Department(models.Model):
 class HealthCheckType(models.Model):
     typeId = models.AutoField(primary_key=True)
     displayName = models.CharField(max_length=50)
+    description = models.TextField(default='')
 
 
 class HealthCheck(models.Model):
@@ -49,7 +50,6 @@ class HealthCheck(models.Model):
     teamId = models.ForeignKey(Team, on_delete=models.CASCADE)
     employeeId = models.ForeignKey(Employee, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
-    description = models.TextField(default='')
     hasStarted = models.BooleanField(default=False)
     hasCompleted = models.BooleanField(default=False)
 

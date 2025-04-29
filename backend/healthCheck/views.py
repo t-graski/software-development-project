@@ -43,6 +43,7 @@ def register_view(request):
                 user=user,
                 roleType='engineer'
             )
+
             login(request, user)
             return redirect('/')
     else:
@@ -73,21 +74,30 @@ def login_view(request):
 
 @login_required
 def profile(request):
+    user = request.user
+    employee = user.employee
+
     if request.method == 'POST':
         first_name = request.POST['first_name']
         last_name = request.POST['last_name']
         email = request.POST['email']
         username = request.POST['username']
+        team_id = request.POST['team']
 
-        user = request.user
         user.first_name = first_name
         user.last_name = last_name
         user.email = email
         user.username = username
         user.save()
 
+        employee.teamId = Team.objects.get(pk=team_id)
+        employee.save()
+
         return redirect('profile')
-    return render(request, 'healthChecks/profile.html')
+
+    all_teams = Team.objects.all()
+
+    return render(request, 'healthChecks/profile.html', {'teams': all_teams})
 
 
 def user_logout(request):
@@ -255,3 +265,36 @@ def engineer_dashboard(request):
     }
 
     return render(request, 'healthChecks/dashboard/engineer.html', context)
+
+
+@login_required
+def team_leader_dashboard(request):
+    employee = request.user.employee
+
+    lead_teams = Team.objects.filter(
+        departmentId__in=Team.objects.filter(
+            employeeteams__employeeId=employee
+        ).values_list('departmentId', flat=True)
+    ).distinct()
+
+    all_cards = HealthCheckType.objects.all()
+
+    selected_team_id = request.GET.get('selected_team_id')
+    selected_card_id = request.GET.get('selected_card_id')
+
+    sessions = HealthCheck.objects.filter(teamId__in=lead_teams)
+
+    if selected_team_id:
+        sessions = sessions.filter(teamId__teamId=selected_team_id)
+    if selected_card_id:
+        sessions = sessions.filter(healthcheckvotes__typeId__typeId=selected_card_id)
+
+    context = {
+        'teams': lead_teams,
+        'cards': all_cards,
+        'sessions': sessions,
+        'selected_team_id': selected_team_id,
+        'selected_card_id': selected_card_id,
+    }
+
+    return render(request, 'healthChecks/dashboard/team_leader.html', context)

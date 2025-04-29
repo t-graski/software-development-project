@@ -7,16 +7,19 @@
 
             <div class="profile-info">
                 <div class="profile-row">
-                    <strong>Firstname:</strong> <span>{{ user.first_name }}</span>
+                    <strong>Firstname:</strong><span>{{ user.first_name }}</span>
                 </div>
                 <div class="profile-row">
-                    <strong>Lastname:</strong> <span>{{ user.last_name }}</span>
+                    <strong>Lastname:</strong><span>{{ user.last_name }}</span>
                 </div>
                 <div class="profile-row">
-                    <strong>Email:</strong> <span>{{ user.email }}</span>
+                    <strong>Email:</strong><span>{{ user.email }}</span>
                 </div>
                 <div class="profile-row">
-                    <strong>Role:</strong> <span>{{ user.roleId }}</span>
+                    <strong>Role:</strong><span>{{ user.employee.roleType }}</span>
+                </div>
+                <div class="profile-row">
+                    <strong>Team:</strong><span>{{ user.employee.teamId.teamName }}</span>
                 </div>
             </div>
 
@@ -39,6 +42,15 @@
                 <div class="form-row">
                     <label for="username">Username:</label>
                     <input type="text" id="username" name="username" value="{{ user.username }}" required>
+                </div>
+                <div class="form-row">
+                    <label for="team">Select Team:</label>
+                    <select id="team" name="team">
+                        {% for team in teams %}
+                            <option value="{{ team.teamId }}"
+                                    {% if user.employee.teamId == team.teamId %}selected{% endif %}>{{ team.teamName }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="form-row">
                     <button type="submit">Update Profile</button>
