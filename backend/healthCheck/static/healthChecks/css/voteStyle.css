@@ -1,0 +1,88 @@
+body {
+    text-align: center;
+    background-attachment: fixed;
+    background-size: 100% 100vh;
+    background-repeat: no-repeat;
+}
+
+h1, h2 {
+    color: #1d88d1;
+}
+
+label {
+    font-size: 17.5px;
+}
+
+input {
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.voteCard {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+    margin-left: 30%;
+    margin-right: 30%;
+    padding-top: 30px;
+    padding-bottom: 30px;
+
+    animation: fadeIn 1s ease;
+}
+
+.hidden {
+    display: none;
+}
+
+#progressInfo { 
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+    margin-left: 30%;
+    margin-right: 30%;
+    padding: 30px;
+}
+
+/*Centers and adds a margin to the text displaying the precentage of completed questions*/
+#percentageCompleted {
+    display: block;
+    text-align: center;
+    margin: 15px;
+}
+
+/*Styles the border of the progress bar*/
+#progressBorder {
+    background-color: #d6faff;
+    border-radius: 10px;
+    width: 100%;
+    height: 20px;
+}
+
+/*Makes the fill color of the progress bar green and makes it start with a width of 0 (JavaScript is used to dynamically change this)*/
+#progressFill {
+    background-color: #0288d1;
+    border-radius: 10px;
+    width: 0;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+#buttonsCard {
+    display: flex;
+    justify-content: space-between;
+    padding: 30px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px){
+    .voteCard, #progressInfo{
+        margin-left: 10%;
+        margin-right: 10%;
+    }
+}
