@@ -1,10 +1,8 @@
 from datetime import datetime
 
 from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.decorators import login_required
 from django.core.checks import messages
 from django.http import HttpResponse, HttpResponseForbidden
-from django.template import loader
 
 from healthCheck.forms import RegisterForm, LoginForm
 from healthCheck.models import *
@@ -16,16 +14,6 @@ from django.views import View
 from .decorators import role_required
 from .models import Employee, HealthCheck, HealthCheckVotes, HealthCheckType
 from django.contrib import messages
-
-
-@login_required
-def index(request):
-    employees = Employee.objects.all()
-    template = loader.get_template("healthChecks/vote.html")
-    context = {
-        "employees": employees
-    }
-    return HttpResponse(template.render(context, request))
 
 
 def register_view(request):
@@ -41,7 +29,7 @@ def register_view(request):
             )
             Employee.objects.create(
                 user=user,
-                roleType='engineer'
+                roleType=form.cleaned_data['roleType']
             )
 
             login(request, user)
@@ -93,7 +81,7 @@ def profile(request):
         employee.teamId = Team.objects.get(pk=team_id)
         employee.save()
 
-        return redirect('profile')
+        return redirect('dashboard')
 
     all_teams = Team.objects.all()
 
@@ -182,8 +170,7 @@ def voteView(request, check_id = None):
         employee = request.user.employee
     except Employee.DoesNotExist:
         return HttpResponse("You don't have an Employee profile yet. Please contact an administrator")
-    
-    #Create variables
+      
     existingVotes = {}
     healthCheck = None
     team = employee.teamId
@@ -191,14 +178,13 @@ def voteView(request, check_id = None):
 
     #If a specific HealthCheck ID is provided then it gets its votes
     if check_id:
-        healthCheck = get_object_or_404(HealthCheck, checkId = check_id)
+        healthCheck = get_object_or_404(HealthCheck, checkId=check_id)
 
         #Stores the existing votes by category ID
         for vote in HealthCheckVotes.objects.filter(checkId = healthCheck):
             existingVotes[vote.typeId.typeId] = {'vote': vote.vote, 'direction': vote.direction}
         
         print(f"Exisitng votes: {existingVotes}")  
-
     #Assign votes and direction to each card to display
     for card in cards:
         voteData = existingVotes.get(card.typeId)
@@ -219,10 +205,10 @@ def voteView(request, check_id = None):
         #Creates a health check if one doesn't already exist
         if not healthCheck:
             healthCheck = HealthCheck.objects.create(
-                employeeId = employee,
-                teamId = team,
-                hasCompleted = isSubmit,
-                hasStarted = True
+                employeeId=employee,
+                teamId=team,
+                hasCompleted=isSubmit,
+                hasStarted=True
             )
 
         #Updates flags based on completion
@@ -246,9 +232,9 @@ def voteView(request, check_id = None):
             #Saves or updates vote in database as long as the vote and progress values are not null
             if voteValue and progressValue:
                 HealthCheckVotes.objects.update_or_create(
-                    checkId = healthCheck,
-                    typeId = card,
-                    defaults = {'vote': voteValue, 'direction': progressValue}
+                    checkId=healthCheck,
+                    typeId=card,
+                    defaults={'vote': voteValue, 'direction': progressValue}
                 )
             else:
                 print(f"No vote or progress selected for card {card.typeId}")
@@ -257,6 +243,7 @@ def voteView(request, check_id = None):
 
     #Renders the voting page with cards and any existing health check data
     return render(request, 'healthChecks/vote.html', {'cards': cards, 'healthCheck': healthCheck})
+
 
 @login_required
 def dashboard(request):
@@ -305,6 +292,7 @@ def engineer_dashboard(request):
 
 
 @login_required
+@role_required(allowed_roles=['teamlead'])
 def team_leader_dashboard(request):
     employee = request.user.employee
 
@@ -326,12 +314,93 @@ def team_leader_dashboard(request):
     if selected_card_id:
         sessions = sessions.filter(healthcheckvotes__typeId__typeId=selected_card_id)
 
+    hour = datetime.now().hour
+    if hour < 12:
+        greeting = "Good Morning"
+    elif 12 <= hour < 18:
+        greeting = "Good Afternoon"
+    else:
+        greeting = "Good Evening"
+
     context = {
         'teams': lead_teams,
         'cards': all_cards,
         'sessions': sessions,
         'selected_team_id': selected_team_id,
         'selected_card_id': selected_card_id,
+        'greeting': f"{greeting}, {employee.user.first_name}!"
     }
 
     return render(request, 'healthChecks/dashboard/team_leader.html', context)
+
+
+@login_required
+@role_required(allowed_roles=['deptlead'])
+def department_leader_dashboard(request):
+    employee = request.user.employee
+
+    lead_teams = Team.objects.filter(
+        departmentId__in=Team.objects.filter(
+            employeeteams__employeeId=employee
+        ).values_list('departmentId', flat=True)
+    ).distinct()
+
+    all_cards = HealthCheckType.objects.all()
+
+    selected_team_id = request.GET.get('selected_team_id')
+    selected_card_id = request.GET.get('selected_card_id')
+
+    sessions = HealthCheck.objects.filter(teamId__in=lead_teams)
+
+    if selected_team_id:
+        sessions = sessions.filter(teamId__teamId=selected_team_id)
+    if selected_card_id:
+        sessions = sessions.filter(healthcheckvotes__typeId__typeId=selected_card_id)
+
+    hour = datetime.now().hour
+    if hour < 12:
+        greeting = "Good Morning"
+    elif 12 <= hour < 18:
+        greeting = "Good Afternoon"
+    else:
+        greeting = "Good Evening"
+
+    context = {
+        'teams': lead_teams,
+        'cards': all_cards,
+        'sessions': sessions,
+        'selected_team_id': selected_team_id,
+        'selected_card_id': selected_card_id,
+        'greeting': f"{greeting}, {employee.user.first_name}!"
+    }
+
+    return render(request, 'healthChecks/dashboard/department_leader.html', context)
+
+
+@login_required
+@role_required(allowed_roles=['senior'])
+def senior_manager_dashboard(request):
+    selected_team_id = request.GET.get('selected_team_id')
+    teams = Team.objects.all()
+
+    if selected_team_id:
+        health_checks = HealthCheck.objects.filter(teamId=selected_team_id)
+    else:
+        health_checks = HealthCheck.objects.all()
+
+    hour = datetime.now().hour
+    if hour < 12:
+        greeting = "Good Morning"
+    elif 12 <= hour < 18:
+        greeting = "Good Afternoon"
+    else:
+        greeting = "Good Evening"
+
+    context = {
+        "sessions": health_checks,
+        "teams": teams,
+        "selected_team_id": selected_team_id,
+        'greeting': f"{greeting}, {request.user.employee.user.first_name}!"
+    }
+
+    return render(request, "healthChecks/dashboard/senior_manager.html", context)

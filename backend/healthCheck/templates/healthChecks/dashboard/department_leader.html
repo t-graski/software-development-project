@@ -30,7 +30,6 @@
             <tr>
                 <th>Team</th>
                 <th>Session</th>
-                <th>Status</th>
                 <th>Action</th>
             </tr>
             </thead>
@@ -39,24 +38,8 @@
                 <tr>
                     <td>{{ session.teamId.teamName }}</td>
                     <td>{{ session.timestamp|date:"Y-m-d H:i" }}</td>
-                    <td>
-                        {% if session.hasCompleted %}
-                            Completed
-                        {% elif session.hasStarted %}
-                            In Progress
-                        {% else %}
-                            Not Started
-                        {% endif %}
-                    </td>
                     <td class="session-action">
                         <a href="" class="button">View average</a>
-                        {% if not session.hasStarted and not session.hasCompleted %}
-                            <a href="/vote/" class="button">Start</a>
-                        {% elif session.hasStarted and not session.hasCompleted %}
-                            <a href="#" class="button">Continue</a>
-                        {% else %}
-                            <a href="#" class="button">View</a>
-                        {% endif %}
                     </td>
                 </tr>
             {% empty %}

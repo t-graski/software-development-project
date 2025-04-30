@@ -1,0 +1,70 @@
+﻿{% extends 'healthChecks/base.html' %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'healthChecks/css/style.css' %}">
+
+{% block content %}
+    <div>
+        <div class="greeting">{{ greeting }}</div>
+
+        <!-- TEAM AVERAGE SUMMARY TABLE -->
+        <h2>Team Averages</h2>
+        <table class="session-table">
+            <thead>
+            <tr>
+                <th>Department</th>
+                <th>Team</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for team in teams %}
+                <tr>
+                    <td>{{ team.departmentId.departmentName }}</td>
+                    <td>{{ team.teamName }}</td>
+                    <td class="session-action">
+                        <a href="#" class="button">View average</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- FILTERED SESSION VIEW -->
+        <h2 style="margin-top: 3rem;">Team Sessions</h2>
+        <form method="get" class="team-select-form">
+            <label for="team-filter">Select Team:</label>
+            <select id="team-filter" name="selected_team_id" onchange="this.form.submit()">
+                <option value="">All Teams</option>
+                {% for team in teams %}
+                    <option value="{{ team.teamId }}"
+                            {% if team.teamId|stringformat:"s" == selected_team_id %}selected{% endif %}>{{ team.teamName }}</option>
+                {% endfor %}
+            </select>
+        </form>
+
+        <table class="session-table">
+            <thead>
+            <tr>
+                <th>Team</th>
+                <th>Session</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for session in sessions %}
+                <tr>
+                    <td>{{ session.teamId.teamName }}</td>
+                    <td>{{ session.timestamp|date:"Y-m-d H:i" }}</td>
+                    <td class="session-action">
+                        <a href="#" class="button">View details</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">No sessions found for selected team.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
