@@ -81,7 +81,6 @@ input[type="radio"].bad:checked{
     justify-content: center;
 }
 
-/*Centers and adds a margin to the text displaying the precentage of completed questions*/
 #percentageCompleted {
     display: block;
     text-align: center;
@@ -96,7 +95,6 @@ input[type="radio"].bad:checked{
     height: 20px;
 }
 
-/*Makes the fill color of the progress bar green and makes it start with a width of 0 (JavaScript is used to dynamically change this)*/
 #progressFill {
     background-color: #0288d1;
     border-radius: 10px;
