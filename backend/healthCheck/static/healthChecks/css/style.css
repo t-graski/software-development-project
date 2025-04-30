@@ -134,6 +134,13 @@ p {
     border-radius: 8px;
 }
 
+.login-container select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
 .login-container a {
     color: #0288d1;
     text-decoration: none;

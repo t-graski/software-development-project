@@ -4,7 +4,7 @@
 
 {% block content %}
     <div>
-        <div class="greeting">Good morning, {{ request.user.first_name }}!</div>
+        <div class="greeting">{{ greeting }}</div>
         <form method="get" class="team-select-form">
             <label for="team-id-select">Team:</label>
             <select id="team-id-select" name="selected_team_id" onchange="this.form.submit()">

@@ -1,10 +1,8 @@
 from datetime import datetime
 
 from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.decorators import login_required
 from django.core.checks import messages
 from django.http import HttpResponse, HttpResponseForbidden
-from django.template import loader
 
 from healthCheck.forms import RegisterForm, LoginForm
 from healthCheck.models import *
@@ -31,7 +29,7 @@ def register_view(request):
             )
             Employee.objects.create(
                 user=user,
-                roleType='engineer'
+                roleType=form.cleaned_data['roleType']
             )
 
             login(request, user)
@@ -83,7 +81,7 @@ def profile(request):
         employee.teamId = Team.objects.get(pk=team_id)
         employee.save()
 
-        return redirect('profile')
+        return redirect('dashboard')
 
     all_teams = Team.objects.all()
 
@@ -308,12 +306,21 @@ def team_leader_dashboard(request):
     if selected_card_id:
         sessions = sessions.filter(healthcheckvotes__typeId__typeId=selected_card_id)
 
+    hour = datetime.now().hour
+    if hour < 12:
+        greeting = "Good Morning"
+    elif 12 <= hour < 18:
+        greeting = "Good Afternoon"
+    else:
+        greeting = "Good Evening"
+
     context = {
         'teams': lead_teams,
         'cards': all_cards,
         'sessions': sessions,
         'selected_team_id': selected_team_id,
         'selected_card_id': selected_card_id,
+        'greeting': f"{greeting}, {employee.user.first_name}!"
     }
 
     return render(request, 'healthChecks/dashboard/team_leader.html', context)
@@ -342,12 +349,21 @@ def department_leader_dashboard(request):
     if selected_card_id:
         sessions = sessions.filter(healthcheckvotes__typeId__typeId=selected_card_id)
 
+    hour = datetime.now().hour
+    if hour < 12:
+        greeting = "Good Morning"
+    elif 12 <= hour < 18:
+        greeting = "Good Afternoon"
+    else:
+        greeting = "Good Evening"
+
     context = {
         'teams': lead_teams,
         'cards': all_cards,
         'sessions': sessions,
         'selected_team_id': selected_team_id,
         'selected_card_id': selected_card_id,
+        'greeting': f"{greeting}, {employee.user.first_name}!"
     }
 
     return render(request, 'healthChecks/dashboard/department_leader.html', context)
@@ -364,10 +380,19 @@ def senior_manager_dashboard(request):
     else:
         health_checks = HealthCheck.objects.all()
 
+    hour = datetime.now().hour
+    if hour < 12:
+        greeting = "Good Morning"
+    elif 12 <= hour < 18:
+        greeting = "Good Afternoon"
+    else:
+        greeting = "Good Evening"
+
     context = {
         "sessions": health_checks,
         "teams": teams,
         "selected_team_id": selected_team_id,
+        'greeting': f"{greeting}, {request.user.employee.user.first_name}!"
     }
 
     return render(request, "healthChecks/dashboard/senior_manager.html", context)

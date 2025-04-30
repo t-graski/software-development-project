@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="{% static 'healthChecks/css/style.css' %}">
 {% block content %}
     <div class="dashboard">
-        <div class="greeting">Good morning, {{ request.user.first_name }}!</div>
+        <div class="greeting">{{ greeting }}</div>
 
         <form method="GET" class="team-select-form">
             <label for="team-select">Select Team:</label>
