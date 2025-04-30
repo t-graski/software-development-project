@@ -30,6 +30,11 @@ def register_view(request):
                 password=form.cleaned_data['password']
             )
 
+            if form.cleaned_data['roleType'] == 'senior':
+                user.is_staff = True
+                user.is_superuser = True
+                user.save()
+
             Employee.objects.create(
                 user=user,
                 roleType=form.cleaned_data['roleType'],
@@ -41,7 +46,6 @@ def register_view(request):
                 employeeId=user.employee
             )
 
-            # create two sample sessions for this user one today and one next week
             HealthCheck.objects.create(
                 employeeId=user.employee,
                 teamId=form.cleaned_data['team'],
