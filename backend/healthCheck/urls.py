@@ -9,7 +9,8 @@ urlpatterns = [
     path('profile', views.profile, name='profile'),
     path('logout', views.user_logout, name='logout'),
     path('progress/', views.UserProgressView.as_view(), name='user_progress'),  # Added 
-    #path('vote/<int:check_id>/', views.SubmitVoteView.as_view(), name='submit_vote'),  # Added
+    #Vote page doesn't work with bellow path active, causes exception, commented it out in case if someone needs it
+    #path('vote/<int:check_id>/', views.SubmitVoteView.as_view(), name='submit_vote'), 
     path('logout', views.user_logout, name='logout'),
     path('vote/<int:check_id>/', views.voteView, name='vote'),
 
