@@ -2,107 +2,108 @@
 {% load static %}
 
 {% block content %}
-<style>
-    .dashboard-title {
-        text-align: center;
-        font-size: 2.5rem;
-        font-weight: bold;
-        color: #004aad; /* Nice dark blue */
-        margin-bottom: 20px;
-        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
-    }
-    .chart-container {
-        background: white;
-        padding: 30px;
-        border-radius: 15px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        margin: 30px auto;
-        width: 500px;
-        max-width: 90%;
-        text-align: center;
-    }
-
-    h2, h3 {
-        text-align: center;
-        margin-top: 20px;
-    }
-
-    form {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-
-    #voteChart {
-        width: 100% !important;
-        height: auto !important;
-        margin-top: 20px;
-    }
-
-    .submit-button {
-        display: block;
-        margin: 20px auto 0;
-        padding: 10px 20px;
-        background-color: #007bff;
-        color: white;
-        font-weight: bold;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-
-    .submit-button:hover {
-        background-color: #0056b3;
-    }
-</style>
-
-
-<h2 class="dashboard-title">User Progress Dashboard</h2>
-
-<form method="get" action="{% url 'user_progress' %}">
-    <label for="session">Select Session:</label>
-    <select name="session_id" id="session">
-        <option value="">--Select a session--</option>
-        {% for session in sessions %}
-            <option value="{{ session.checkId }}" {% if session.checkId == selected_session_id %}selected{% endif %}>
-                {{ session.timestamp }}
-            </option>
-        {% endfor %}
-    </select>
-    <button type="submit" class="submit-button">Submit</button>
-</form>
-
-<div class="chart-container">
-    <h3>Vote Distribution</h3>
-    <canvas id="voteChart"></canvas>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    const voteData = {{ vote_data|safe }};
-    const ctx = document.getElementById('voteChart').getContext('2d');
-
-    const chart = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: Object.keys(voteData),
-            datasets: [{
-                label: 'Vote Counts',
-                data: Object.values(voteData),
-                backgroundColor: ['#3498db', '#e74c3c', '#f1c40f'], // Custom colors
-                hoverOffset: 20,
-                borderWidth: 1,
-                borderColor: '#ffffff'
-            }]
-        },
-        options: {
-            responsive: true,
-            animation: {
-                animateScale: true,
-                duration: 1000,
-                easing: 'easeOutBounce'
-            }
+    <style>
+        .dashboard-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #004aad;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
         }
-    });
-</script>
+
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin: 30px auto;
+            width: 500px;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        h2, h3 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #voteChart {
+            width: 100% !important;
+            height: auto !important;
+            margin-top: 20px;
+        }
+
+        .submit-button {
+            display: block;
+            margin: 20px auto 0;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+
+    <h2 class="dashboard-title">User Progress Dashboard</h2>
+
+    <form method="get" action="{% url 'user_progress' %}">
+        <label for="session">Select Session:</label>
+        <select name="session_id" id="session">
+            <option value="">--Select a session--</option>
+            {% for session in sessions %}
+                <option value="{{ session.checkId }}"
+                        {% if session.checkId == selected_session_id %}selected{% endif %}>
+                    {{ session.timestamp }}
+                </option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="submit-button">Submit</button>
+    </form>
+
+    <div class="chart-container">
+        <h3>Vote Distribution</h3>
+        <canvas id="voteChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const voteData = {{ vote_data|safe }};
+        const ctx = document.getElementById('voteChart').getContext('2d');
+
+        const chart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(voteData),
+                datasets: [{
+                    label: 'Vote Counts',
+                    data: Object.values(voteData),
+                    backgroundColor: ['#3498db', '#e74c3c', '#f1c40f'], // Custom colors
+                    hoverOffset: 20,
+                    borderWidth: 1,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                animation: {
+                    animateScale: true,
+                    duration: 1000,
+                    easing: 'easeOutBounce'
+                }
+            }
+        });
+    </script>
 {% endblock %}

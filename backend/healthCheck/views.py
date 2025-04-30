@@ -1,6 +1,6 @@
 # Author: Tobias Graski, Adam Ghounbaz, Soumashik Chatterjee
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.contrib.auth import login, authenticate, logout
 from django.core.checks import messages
@@ -36,10 +36,25 @@ def register_view(request):
                 teamId=form.cleaned_data['team']
             )
 
-            # create employee teams
             EmployeeTeams.objects.create(
                 teamId=form.cleaned_data['team'],
                 employeeId=user.employee
+            )
+
+            # create two sample sessions for this user one today and one next week
+            HealthCheck.objects.create(
+                employeeId=user.employee,
+                teamId=form.cleaned_data['team'],
+                hasCompleted=False,
+                hasStarted=False
+            )
+
+            HealthCheck.objects.create(
+                employeeId=user.employee,
+                teamId=form.cleaned_data['team'],
+                hasCompleted=False,
+                hasStarted=False,
+                timestamp=datetime.now() + timedelta(days=7)
             )
 
             login(request, user)

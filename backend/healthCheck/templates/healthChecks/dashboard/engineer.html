@@ -47,7 +47,7 @@
                         {% elif session.hasStarted and not session.hasCompleted %}
                             <a href="{% url 'vote' check_id=session.checkId %}" class="button">Continue</a>
                         {% else %}
-                            <a href="{% url 'vote' check_id=session.checkId %}" class="button">View</a>
+                            <a href="{% url 'user_progress' %}" class="button">View</a>
                         {% endif %}
                     </td>
                 </tr>
