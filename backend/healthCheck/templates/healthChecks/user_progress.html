@@ -1,8 +1,11 @@
+{# Author: Soumashik Chatterjee - Designed and implemented the user progress chart UI #}
+
 {% extends 'healthChecks/base.html' %}
 {% load static %}
 
 {% block content %}
 <style>
+    /* Style for the main dashboard title */
     .dashboard-title {
         text-align: center;
         font-size: 2.5rem;
@@ -11,6 +14,8 @@
         margin-bottom: 20px;
         text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
     }
+
+    /* Container styling for the chart */
     .chart-container {
         background: white;
         padding: 30px;
@@ -27,17 +32,20 @@
         margin-top: 20px;
     }
 
+    /* Align session filter form */
     form {
         text-align: center;
         margin-bottom: 20px;
     }
 
+    /* Responsive chart size */
     #voteChart {
         width: 100% !important;
         height: auto !important;
         margin-top: 20px;
     }
 
+    /* Button styling */
     .submit-button {
         display: block;
         margin: 20px auto 0;
@@ -56,14 +64,16 @@
     }
 </style>
 
-
+<!-- Dashboard header -->
 <h2 class="dashboard-title">User Progress Dashboard</h2>
 
+<!-- Session filter dropdown -->
 <form method="get" action="{% url 'user_progress' %}">
     <label for="session">Select Session:</label>
     <select name="session_id" id="session">
         <option value="">--Select a session--</option>
         {% for session in sessions %}
+            <!-- Pre-select the currently selected session -->
             <option value="{{ session.checkId }}" {% if session.checkId == selected_session_id %}selected{% endif %}>
                 {{ session.timestamp }}
             </option>
@@ -72,24 +82,28 @@
     <button type="submit" class="submit-button">Submit</button>
 </form>
 
+<!-- Chart container section -->
 <div class="chart-container">
     <h3>Vote Distribution</h3>
-    <canvas id="voteChart"></canvas>
+    <canvas id="voteChart"></canvas> <!-- Canvas for pie chart -->
 </div>
 
+<!-- Chart.js library import -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    // Data passed from Django view as JSON
     const voteData = {{ vote_data|safe }};
     const ctx = document.getElementById('voteChart').getContext('2d');
 
+    // Create and render a pie chart using Chart.js
     const chart = new Chart(ctx, {
         type: 'pie',
         data: {
-            labels: Object.keys(voteData),
+            labels: Object.keys(voteData), // Category names
             datasets: [{
                 label: 'Vote Counts',
-                data: Object.values(voteData),
-                backgroundColor: ['#3498db', '#e74c3c', '#f1c40f'], // Custom colors
+                data: Object.values(voteData), // Vote count per category
+                backgroundColor: ['#3498db', '#e74c3c', '#f1c40f'], // Pie slice colors
                 hoverOffset: 20,
                 borderWidth: 1,
                 borderColor: '#ffffff'
@@ -100,7 +114,7 @@
             animation: {
                 animateScale: true,
                 duration: 1000,
-                easing: 'easeOutBounce'
+                easing: 'easeOutBounce' // Smooth animation
             }
         }
     });

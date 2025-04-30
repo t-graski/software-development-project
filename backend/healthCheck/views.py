@@ -90,7 +90,8 @@ def user_logout(request):
     logout(request)
     return redirect('login')
 
-#SC edit
+# Author: Soumashik Chatterjee - Implemented user progress tracking and voting logic (views & submission handling)
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -98,31 +99,42 @@ from django.views import View
 from .models import Employee, HealthCheck, HealthCheckVotes, HealthCheckType
 from django.contrib import messages
 
+# View for displaying the user's progress dashboard with vote history
 @method_decorator(login_required, name='dispatch')
 class UserProgressView(View):
     def get(self, request):
         try:
+            # Fetch the current employee profile for the logged-in user
             employee = Employee.objects.get(user=request.user)
         except Employee.DoesNotExist:
+            # Handle missing profile scenario gracefully
             messages.error(request, 'Employee profile not found.')
-            return redirect('profile')  # Or some safe fallback
+            return redirect('profile')  # Fallback route
 
+        # Get all health check sessions for the user
         sessions = HealthCheck.objects.filter(employeeId=employee)
+
+        # Get session ID from the query parameter (if selected)
         selected_session_id = request.GET.get('session_id')
 
+        # Initialize empty vote queryset
         votes = HealthCheckVotes.objects.none()
         if selected_session_id:
+            # Filter votes belonging to the selected session and user
             votes = HealthCheckVotes.objects.filter(
                 checkId__checkId=selected_session_id,
                 checkId__employeeId=employee
             )
 
+        # Initialize vote data structure using all available health check types
         types = HealthCheckType.objects.all()
         vote_data = {type_.displayName: 0 for type_ in types}
 
+        # Aggregate vote counts per category/type
         for vote in votes:
             vote_data[vote.typeId.displayName] += 1
 
+        # Pass all necessary data to the template
         context = {
             'sessions': sessions,
             'selected_session_id': int(selected_session_id) if selected_session_id else None,
@@ -130,25 +142,31 @@ class UserProgressView(View):
         }
         return render(request, 'healthChecks/user_progress.html', context)
 
+# View to handle vote submission from the user
 @method_decorator(login_required, name='dispatch')
 class SubmitVoteView(View):
     def post(self, request, check_id):
         try:
+            # Find the employee object for the currently logged-in user
             employee = Employee.objects.get(email=request.user.email)
         except Employee.DoesNotExist:
             messages.error(request, 'Employee profile not found.')
             return redirect('user_progress')
 
+        # Get the associated health check instance using the check ID
         healthcheck = get_object_or_404(HealthCheck, checkId=check_id)
 
+        # Extract form values from POST request
         vote_value = request.POST.get('vote')
         type_id = request.POST.get('type_id')
         direction = request.POST.get('direction')
 
+        # Validate that all fields are filled
         if not vote_value or not type_id or not direction:
             messages.error(request, 'All fields are required.')
             return redirect('user_progress')
 
+        # Prevent duplicate votes for the same check and type
         already_voted = HealthCheckVotes.objects.filter(
             checkId=healthcheck,
             typeId_id=type_id
@@ -157,6 +175,7 @@ class SubmitVoteView(View):
         if already_voted:
             messages.warning(request, 'Already voted for this check and type.')
         else:
+            # Create new vote entry if not already submitted
             HealthCheckVotes.objects.create(
                 checkId=healthcheck,
                 typeId_id=type_id,
@@ -167,46 +186,52 @@ class SubmitVoteView(View):
 
         return redirect('user_progress')
 
+# View to display the vote cards and allow new vote submissions
 @login_required
 def voteView(request):
     try:
+        # Get the current employee object
         employee = request.user.employee
     except Employee.DoesNotExist:
         return HttpResponse("You don't have an Employee profile yet. Please contact an administrator")
     
-    team = employee.teamId    
+    team = employee.teamId  # Get the employee's team
 
+    # Load all health check types to display as cards
     cards = HealthCheckType.objects.all()
-    print(f"Cards: {cards}")
+    print(f"Cards: {cards}")  # Debugging output
 
     if request.method == 'POST':
-        print(request.POST)
+        print(request.POST)  # Debugging form data
 
-        if 'save' in request.POST:           
-            return redirect('vote')
+        if 'save' in request.POST:
+            return redirect('vote')  # Simple save action (future-proofing)
 
         else:
+            # Create a new health check record for the employee
             healthCheck = HealthCheck.objects.create(
-            employeeId = employee,
-            teamId = team
-        )   
+                employeeId=employee,
+                teamId=team
+            )
 
-        for card in cards:
-            voteValue = request.POST.get(f'vote_{card.typeId}')
-            progressValue = request.POST.get(f'progress_{card.typeId}')
+            # Loop through each card type and retrieve submitted vote and direction
+            for card in cards:
+                voteValue = request.POST.get(f'vote_{card.typeId}')
+                progressValue = request.POST.get(f'progress_{card.typeId}')
 
-            print(f"Vote value for {card.typeId}: {voteValue}")
-            print(f"Direction value for {card.typeId}: {progressValue}")
+                print(f"Vote value for {card.typeId}: {voteValue}")  # Debugging
+                print(f"Direction value for {card.typeId}: {progressValue}")  # Debugging
 
-            if voteValue and progressValue:
-                HealthCheckVotes.objects.update_or_create(
-                    checkId = healthCheck,
-                    typeId = card,
-                    defaults = {'vote': voteValue, 'direction': progressValue}
-                )
-            else:
-                print(f"No vote selected for card {card.typeId}")
+                if voteValue and progressValue:
+                    # Create or update the vote entry per card type
+                    HealthCheckVotes.objects.update_or_create(
+                        checkId=healthCheck,
+                        typeId=card,
+                        defaults={'vote': voteValue, 'direction': progressValue}
+                    )
+                else:
+                    print(f"No vote selected for card {card.typeId}")  # Incomplete submission log
         
-        return redirect('vote')
+        return redirect('vote')  # Redirect after submission
 
     return render(request, 'healthChecks/vote.html', {'cards': cards})
