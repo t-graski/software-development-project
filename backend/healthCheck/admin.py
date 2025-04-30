@@ -2,8 +2,6 @@ from django.contrib import admin
 
 from .models import HealthCheck, Department, Employee, EmployeeTeams, HealthCheckType, HealthCheckVotes, Team
 
-# Register your models here.
-
 admin.site.register(HealthCheck)
 admin.site.register(Department)
 admin.site.register(Employee)

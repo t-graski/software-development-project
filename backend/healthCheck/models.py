@@ -1,3 +1,5 @@
+# Author: Tobias Graski, Adam Ghounbaz
+
 from django.contrib.auth.models import User
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models

@@ -1,4 +1,6 @@
-﻿{% load static %}
+﻿{# Author: Tobias Graski #}
+
+{% load static %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -17,12 +19,10 @@
         <img src="{% static 'healthChecks/images/sky_logo.png' %}" alt="Sky Logo"
              style="width: 100px; margin-bottom: 2rem;">
         <nav>
-            <a href="/dashboard" style="color: white; text-decoration: none; font-weight: bold;">Home</a>
+            <a href="/dashboard" style="color: white; text-decoration: none; font-weight: bold;">Dashboard</a>
             <a href="{% url 'profile' %}" style="color: white; text-decoration: none; font-weight: bold;">Profile</a>
             <a href="{% url 'logout' %}" style="color: white; text-decoration: none; font-weight: bold;">Logout</a>
         </nav>
-        {#    add a text to the bottom of the sidebar indicating what role the user has#}
-
         {% if request.user.is_authenticated %}
             <div class="role-label">
                 {{ request.user.employee.roleType|title }} View

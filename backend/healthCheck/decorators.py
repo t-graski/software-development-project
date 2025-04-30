@@ -1,5 +1,6 @@
-﻿from django.http import HttpResponseForbidden
+﻿# Author: Tobias Graski
 
+from django.http import HttpResponseForbidden
 
 def role_required(allowed_roles=[]):
     def decorator(view_func):

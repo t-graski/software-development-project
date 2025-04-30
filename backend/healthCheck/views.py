@@ -1,3 +1,5 @@
+# Author: Tobias Graski, Adam Ghounbaz, Soumashik Chatterjee
+
 from datetime import datetime
 
 from django.contrib.auth import login, authenticate, logout
