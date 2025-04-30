@@ -2,12 +2,14 @@
 {% load static %}
 
 {% block head %}
+<!--Loads CSS stylesheets-->
 <link rel="stylesheet" href="{% static 'healthChecks/css/style.css' %}">
 <link rel="stylesheet" href="{% static 'healthChecks/css/voteStyle.css' %}">    
 {% endblock %}
 
 {% block content %}
 
+<!--Displays progress bar and percentage completed-->
 <div id="progressInfo">
     <h1 id="title">Let's Complete The Health Check</h1>
     <div id="progressBorder">
@@ -17,11 +19,13 @@
     <span id="percentageCompleted"></span>
 </div>
 
+<!--Main form for voting on different health check cards-->
 <div class="cards">
     <form method="post">
         {% csrf_token %}
         <input type="hidden" name="check_id" value="{{ healthCheck.checkId}}">
-
+        
+        <!--Card explaing how to use the page-->
         <div class="voteCard">
             <h2>How To Vote</h2>
 
@@ -36,14 +40,16 @@
     
         <br>
 
+        <!--Loops through all the health check cards-->
         {% for card in cards %}
         <div class="voteCard">
             <h2>{{card.displayName}}</h2>
-
             <p>{{ card.description }}</p>
-    
+            
+            <!--First question-->
             <p>How well does your team achieve this?:</p>
             
+            <!--Vote radio buttons. Automatically checks options that have been saved from the session-->
             <label for="vote_{{ card.typeId }}_good" class="good">
                 <input type="radio" class="question good" id="vote_{{ card.typeId }}_good" name="vote_{{ card.typeId }}" value="Good"
                 {% if card.vote == "Good" %}
@@ -67,7 +73,10 @@
             </label>
             <br><br>
 
+            <!--Second question-->
             <p>How well is your team progressing to achieve this?: </p>
+
+            <!--Progress radio buttons. Automatically checks options that have been saved from the session-->
             <label for="progress_{{ card.typeId }}_good" class="good">
                 <input type="radio" class="question good" id="progress_{{ card.typeId }}_good" name="progress_{{ card.typeId }}" value="Good"
                 {% if card.direction == "Good" %}
@@ -90,8 +99,10 @@
                 Bad
             </label>
         </div>
-    
+
         <br>
+
+        <!--Submit/Save buttons-->
         {% endfor %}
         <div class="voteCard" id="buttonsCard">
             <button type="submit" class="button" name="save" value="save">Save and Come Back Later</button>
@@ -100,40 +111,47 @@
     </form>
 </div>
 
-
+<!--JavaScript for tracking and updating progress bar-->
 <script>
-    let answeredQuestions = new Set();
-    let totalQuestions = document.getElementsByClassName('question').length / 3;
-    let percentage = 0;
+    let answeredQuestions = new Set(); //Stores all the questions that have been answered in a set
+    let totalQuestions = document.getElementsByClassName('question').length / 3; //Calculate total number of unique questions (each has 3 options: Good, Neutral, Bad)
+    let percentage = 0; //Variable to store the percentage
 
+    //Function to update the progress bar
     function updateProgressBar(){
         percentage = (answeredQuestions.size / totalQuestions) * 100;
         document.getElementById('percentageCompleted').textContent = `${Math.round(percentage)}% completed`;
         document.getElementById('progressFill').style.width = Math.round(percentage) + '%';
 
+        //If the percentage reaches 100% then it shows the submit button and changes the title to "Health Check Completed"
         if(percentage === 100){
             document.getElementById('submit').classList.remove('hidden');
             document.getElementById('title').textContent = 'Health Check Completed';
         }
     }
-        
+    
+    //Loops through all radio buttons
     document.querySelectorAll('input[type="radio"]').forEach(function(input){
         const key = input.name;
 
+        //If already selected on page load then it is added to the answeredQuestions set
         if(input.checked){
             answeredQuestions.add(key);
         }
 
+        //Adds event listener to detect when a radio button is changed
         input.addEventListener('change', function(){
-            const alreadyAnswered = answeredQuestions.has(key);
-             
+            const alreadyAnswered = answeredQuestions.has(key); //Checks if this question has been answered and stores it
+            
+            //If this question hasn't been answered yet then it is marked as answered
             if(!alreadyAnswered){
                 answeredQuestions.add(key);
-                updateProgressBar(); 
+                updateProgressBar();  //Update the progress bar since progress was made
             }             
         });           
     });
 
+    //Initial call to populate progress bar when page loads
     updateProgressBar();
 </script>
 
