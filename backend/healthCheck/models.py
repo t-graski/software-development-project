@@ -24,6 +24,9 @@ class Team(models.Model):
     teamName = models.CharField(max_length=50)
     departmentId = models.ForeignKey("Department", on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.teamName
+
 
 class EmployeeTeams(models.Model):
     teamId = models.ForeignKey(Team, on_delete=models.CASCADE)

@@ -29,9 +29,17 @@ def register_view(request):
                 last_name=form.cleaned_data['last_name'],
                 password=form.cleaned_data['password']
             )
+
             Employee.objects.create(
                 user=user,
-                roleType=form.cleaned_data['roleType']
+                roleType=form.cleaned_data['roleType'],
+                teamId=form.cleaned_data['team']
+            )
+
+            # create employee teams
+            EmployeeTeams.objects.create(
+                teamId=form.cleaned_data['team'],
+                employeeId=user.employee
             )
 
             login(request, user)
@@ -165,29 +173,30 @@ class SubmitVoteView(View):
 
         return redirect('user_progress')
 
+
 @login_required
-def voteView(request, check_id = None):
-    #Makes sure the user has an Employee profile
+def voteView(request, check_id=None):
+    # Makes sure the user has an Employee profile
     try:
         employee = request.user.employee
     except Employee.DoesNotExist:
         return HttpResponse("You don't have an Employee profile yet. Please contact an administrator")
-      
+
     existingVotes = {}
     healthCheck = None
     team = employee.teamId
-    cards = HealthCheckType.objects.all() #Stores all health check cards
+    cards = HealthCheckType.objects.all()  # Stores all health check cards
 
-    #If a specific HealthCheck ID is provided then it gets its votes
+    # If a specific HealthCheck ID is provided then it gets its votes
     if check_id:
         healthCheck = get_object_or_404(HealthCheck, checkId=check_id)
 
-        #Stores the existing votes by category ID
-        for vote in HealthCheckVotes.objects.filter(checkId = healthCheck):
+        # Stores the existing votes by category ID
+        for vote in HealthCheckVotes.objects.filter(checkId=healthCheck):
             existingVotes[vote.typeId.typeId] = {'vote': vote.vote, 'direction': vote.direction}
-        
-        print(f"Exisitng votes: {existingVotes}")  
-    #Assign votes and direction to each card to display
+
+        print(f"Exisitng votes: {existingVotes}")
+        # Assign votes and direction to each card to display
     for card in cards:
         voteData = existingVotes.get(card.typeId)
         card.vote = voteData['vote'] if voteData else None
@@ -197,14 +206,14 @@ def voteView(request, check_id = None):
 
     print(f"Cards: {cards}")
 
-    #If form is submitted
+    # If form is submitted
     if request.method == 'POST':
         print(request.POST)
 
         isSubmit = 'submit' in request.POST
         isSave = 'save' in request.POST
 
-        #Creates a health check if one doesn't already exist
+        # Creates a health check if one doesn't already exist
         if not healthCheck:
             healthCheck = HealthCheck.objects.create(
                 employeeId=employee,
@@ -213,7 +222,7 @@ def voteView(request, check_id = None):
                 hasStarted=True
             )
 
-        #Updates flags based on completion
+        # Updates flags based on completion
         else:
             if isSubmit:
                 healthCheck.hasCompleted = True
@@ -223,7 +232,7 @@ def voteView(request, check_id = None):
                 healthCheck.hasStarted = True
                 healthCheck.save()
 
-        #Process each card's vote and progress values
+        # Process each card's vote and progress values
         for card in cards:
             voteValue = request.POST.get(f'vote_{card.typeId}')
             progressValue = request.POST.get(f'progress_{card.typeId}')
@@ -231,7 +240,7 @@ def voteView(request, check_id = None):
             print(f"Vote value for {card.typeId}: {voteValue}")
             print(f"Direction value for {card.typeId}: {progressValue}")
 
-            #Saves or updates vote in database as long as the vote and progress values are not null
+            # Saves or updates vote in database as long as the vote and progress values are not null
             if voteValue and progressValue:
                 HealthCheckVotes.objects.update_or_create(
                     checkId=healthCheck,
@@ -241,9 +250,9 @@ def voteView(request, check_id = None):
             else:
                 print(f"No vote or progress selected for card {card.typeId}")
 
-        return redirect('dashboard') #Redirects to dashboard after saving/submitting
+        return redirect('dashboard')  # Redirects to dashboard after saving/submitting
 
-    #Renders the voting page with cards and any existing health check data
+    # Renders the voting page with cards and any existing health check data
     return render(request, 'healthChecks/vote.html', {'cards': cards, 'healthCheck': healthCheck})
 
 

@@ -2,6 +2,9 @@
 
 from django import forms
 from django.contrib.auth.models import User
+from django.utils.translation.template import TRANSLATOR_COMMENT_MARK
+
+from healthCheck.models import Team
 
 
 class RegisterForm(forms.ModelForm):
@@ -19,9 +22,11 @@ class RegisterForm(forms.ModelForm):
     ]
     roleType = forms.ChoiceField(choices=ROLE_CHOICES, required=True)
 
+    team = forms.ModelChoiceField(queryset=Team.objects.all(), required=True)
+
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'email', 'password', 'roleType']
+        fields = ['username', 'first_name', 'last_name', 'email', 'password', 'roleType', 'team']
 
 
 class LoginForm(forms.Form):
