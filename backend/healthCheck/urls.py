@@ -20,4 +20,7 @@ urlpatterns = [
     path('dashboard/teamlead', views.team_leader_dashboard, name='team_leader_dashboard'),
     path('dashboard/deptlead', views.department_leader_dashboard, name='department_leader_dashboard'),
     path('dashboard/senior', views.senior_manager_dashboard, name='senior_manager_dashboard'),
+
+    path('progress/team/', views.team_leader_progress_summary, name='team_leader_progress_summary'),
+    path('progress/department/', views.department_leader_progress_summary, name='department_leader_progress_summary'),
 ]

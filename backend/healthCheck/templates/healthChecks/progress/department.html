@@ -1,0 +1,125 @@
+{% extends 'healthChecks/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<h2>Department Leader - Progress Summary</h2>
+
+<form method="get" class="filter-bar">
+  <label for="department_id">Department:</label>
+  <select name="department_id" id="department_id">
+      <option value="">All Departments</option>
+      {% for department in departments %}
+          <option value="{{ department.departmentId }}" {% if department.departmentId|stringformat:"s" == selected_dept_id %}selected{% endif %}>
+              {{ department.departmentName }}
+          </option>
+      {% endfor %}
+  </select>
+</form>
+
+<style>
+  body {
+    background-attachment: fixed;
+    background-size: 100% 100vh;
+    background-repeat: no-repeat;
+  }
+
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+    font-size: 1.2rem;
+    padding: 0 40px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .filter-bar select,
+  .filter-bar button {
+    padding: 10px 16px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    min-width: 200px;
+  }
+
+  .icon-circle {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+
+  .green { background-color: green; }
+  .amber { background-color: orange; }
+  .red { background-color: red; }
+
+  .arrow-up::before { content: "↑"; }
+  .arrow-middle::before { content: "→"; }
+  .arrow-down::before { content: "↓"; }
+
+  .summary-container {
+    width: 100%;
+    padding: 0 40px;
+    box-sizing: border-box;
+  }
+
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .summary-table th,
+  .summary-table td {
+    padding: 18px 24px;
+    text-align: center;
+    font-size: 16px;
+    border: 1px solid #ddd;
+  }
+
+  .summary-table th {
+    background-color: #004aad;
+    color: white;
+    font-size: 18px;
+  }
+
+  .summary-table tr:nth-child(even) {
+    background-color: white !important;
+  }
+</style>
+
+<div class="summary-container">
+<table class="summary-table">
+    <thead>
+        <tr>
+            <th>Vote ↓ / Direction →</th>
+            <th><span class="arrow-up"></span></th>
+            <th><span class="arrow-middle"></span></th>
+            <th><span class="arrow-down"></span></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for vote in votes %}
+        <tr>
+            <td><span class="icon-circle {{ vote }}"></span></td>
+            {% for direction in directions %}
+                {% with key=vote|add:"_"|add:direction %}
+                <td>
+                    Total: {{ summary_matrix.key.total|default:"–" }}<br>
+                    Avg: {{ summary_matrix.key.average|default:"–" }}
+                </td>
+                {% endwith %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+{% endblock %}

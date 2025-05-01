@@ -18,6 +18,9 @@ from .models import Employee, HealthCheck, HealthCheckVotes, HealthCheckType
 from django.contrib import messages
 
 
+
+
+
 def register_view(request):
     if request.method == "POST":
         form = RegisterForm(request.POST)
@@ -406,3 +409,84 @@ def senior_manager_dashboard(request):
     }
 
     return render(request, "healthChecks/dashboard/senior_manager.html", context)
+
+
+@login_required
+@role_required(allowed_roles=['teamlead'])
+def team_leader_progress_summary(request):
+    employee = request.user.employee
+    selected_team_id = request.GET.get('team_id')
+
+    teams = Team.objects.filter(
+        departmentId__in=Team.objects.filter(
+            employeeteams__employeeId=employee
+        ).values_list('departmentId', flat=True)
+    ).distinct()
+
+    votes_query = HealthCheckVotes.objects.all()
+    if selected_team_id:
+        votes_query = votes_query.filter(checkId__teamId=selected_team_id)
+
+    total_votes = votes_query.count()
+
+    vote_levels = ['green', 'amber', 'red']
+    direction_levels = ['up', 'middle', 'down']
+
+    summary_matrix = {}
+
+    for vote in vote_levels:
+        for direction in direction_levels:
+            key = f"{vote}_{direction}"
+            count = votes_query.filter(vote=vote, direction=direction).count()
+            average = round(count / total_votes, 2) if total_votes > 0 else 0
+            summary_matrix[key] = {
+                'total': count,
+                'average': average
+            }
+
+    context = {
+        'summary_matrix': summary_matrix,
+        'teams': teams,
+        'selected_team_id': selected_team_id,
+        'votes': vote_levels,
+        'directions': direction_levels,
+    }
+
+    return render(request, 'healthChecks/progress/team.html', context)
+
+@login_required
+@role_required(allowed_roles=['deptlead'])
+def department_leader_progress_summary(request):
+    selected_dept_id = request.GET.get('department_id')
+    departments = Department.objects.all()
+
+    votes_query = HealthCheckVotes.objects.all()
+    if selected_dept_id:
+        votes_query = votes_query.filter(
+            checkId__teamId__departmentId__departmentId=selected_dept_id
+        )
+
+    total_votes = votes_query.count()
+
+    vote_types = ['green', 'amber', 'red']
+    direction_types = ['up', 'middle', 'down']
+
+    summary_matrix = {}
+    for vote in vote_types:
+        summary_matrix[vote] = {}
+        for direction in direction_types:
+            count = votes_query.filter(vote=vote, direction=direction).count()
+            average = round(count / total_votes, 2) if total_votes > 0 else 0
+            summary_matrix[vote][direction] = {
+                'total': count,
+                'average': average
+            }
+
+    return render(request, 'healthChecks/progress/department.html', {
+        'summary_matrix': summary_matrix,
+        'departments': departments,
+        'selected_dept_id': selected_dept_id,
+        'votes': vote_types,
+        'directions': direction_types,
+        'role': 'Department Leader',
+    })
