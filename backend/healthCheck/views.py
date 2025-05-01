@@ -1,4 +1,4 @@
-# Author: Tobias Graski, Adam Ghounbaz, Soumashik Chatterjee
+# Author: Tobias Graski, Adam Ghounbaz, Soumashik Chatterjee, Oleksii Denysenko
 
 from datetime import datetime
 
